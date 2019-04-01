@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "937774516271",
+    "firebase_url": "https://shooping-list-3ec33.firebaseio.com",
+    "project_id": "shooping-list-3ec33",
+    "storage_bucket": "shooping-list-3ec33.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:937774516271:android:7cb5107a665b1158",
+        "android_client_info": {
+          "package_name": "com.example.supjain.shoppinglist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "937774516271-ue0j3hlk1e2up765kk3b30eqn05upquq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArLMx8Burpkzzkdo8DZaLvRxC31460UAE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
