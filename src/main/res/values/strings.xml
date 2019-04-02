@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">ShoppingList</string>
+    <string name="list_type_image_content_desc">List type image</string>
+    <string name="dummy_list_name">Dummy list name</string>
+    <string name="list_name_label_text">List Name:</string>
+    <string name="list_name_edittext_hint">Enter list name (30 chars max)</string>
+    <string name="list_type_label_text">List Type:</string>
+    <string name="create_list_btn_text">Create List</string>
+    <string name="item_name_label_text">Item Name:</string>
+    <string name="item_name_edittext_hint">Enter item name (50 chars max)</string>
+    <string name="item_quantity_edittext_hint">1</string>
+    <string name="item_measure_edittext_hint">Measuring unit</string>
+    <string name="add_item_btn_text">Add item</string>
+    <string name="store_name_label_text">Store Name:</string>
+    <string name="store_name_edittext_hint">Enter name of the store</string>
+    <string name="store_address_label_text">Address:</string>
+    <string name="store_address_edittext_hint">Enter address of the store</string>
 </resources>
