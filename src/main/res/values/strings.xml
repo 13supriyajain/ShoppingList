@@ -15,4 +15,6 @@
     <string name="store_name_edittext_hint">Enter name of the store</string>
     <string name="store_address_label_text">Address:</string>
     <string name="store_address_edittext_hint">Enter address of the store</string>
+    <string name="item_quantity_label_text">Quantity:</string>
+    <string name="dummy_item_name_text">Dummy_item -- 1 Kg</string>
 </resources>
