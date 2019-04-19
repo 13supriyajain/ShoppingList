@@ -1,4 +1,4 @@
-package com.example.supjain.shoppinglist.Util;
+package com.example.supjain.shoppinglist.util;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

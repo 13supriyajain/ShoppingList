@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
 
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.example.supjain.shoppinglist.viewmodel.ShoppingListsViewModel" />
+    </data>
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
+        android:padding="@dimen/margin_small">
 
         <TextView
             android:id="@+id/network_err_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone"
+            android:text="@{viewModel.errorMsg}"
+            android:textColor="@android:color/white"
+            android:visibility="@{viewModel.errorMsg != null ? View.VISIBLE : View.GONE}"
             tools:text="No internet connection.\nPlease try again later !" />
 
         <ProgressBar
@@ -20,12 +34,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone" />
+            android:visibility="@{(viewModel.list == null || viewModel.list.isEmpty() &amp;&amp; viewModel.errorMsg == null) ? View.VISIBLE : View.GONE}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/shoppinglists_recyclerview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:visibility="@{(viewModel.list != null || !viewModel.list.isEmpty()) ? View.VISIBLE : View.GONE}"
+            app:listdata="@{viewModel.list}" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/create_list_fab"

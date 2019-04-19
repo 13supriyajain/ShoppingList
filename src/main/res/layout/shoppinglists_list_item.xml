@@ -3,6 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="list"
+            type="com.example.supjain.shoppinglist.data.ShoppingList" />
+    </data>
+
+
     <androidx.cardview.widget.CardView
         android:id="@+id/list_cards_container"
         android:layout_width="wrap_content"
@@ -23,7 +31,7 @@
                 android:layout_gravity="center"
                 android:contentDescription="@string/list_type_image_content_desc"
                 android:scaleType="center"
-                android:src="@drawable/default_list_img" />
+                app:src="@{list.shoppingListImageId}" />
 
             <View
                 android:layout_width="match_parent"
@@ -37,6 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_small"
                 android:gravity="center"
+                android:text="@{list.shoppingListName}"
                 android:textAppearance="?android:textAppearanceMedium"
                 android:textColor="@color/colorPrimaryDark"
                 android:textStyle="bold"

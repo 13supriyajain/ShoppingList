@@ -17,4 +17,17 @@
     <string name="store_address_edittext_hint">Enter address of the store</string>
     <string name="item_quantity_label_text">Quantity:</string>
     <string name="dummy_item_name_text">Dummy_item -- 1 Kg</string>
+    <string name="create_list_activity_title">Create New List</string>
+    <string name="main_activity_title">Your Shopping Lists</string>
+
+    <string-array name="list_types_array">
+        <item>Grocery</item>
+        <item>Household Stuff</item>
+        <item>Party</item>
+        <item>Trip</item>
+        <item>Wedding</item>
+        <item>Birthday</item>
+        <item>Office Supply</item>
+        <item>Other</item>
+    </string-array>
 </resources>

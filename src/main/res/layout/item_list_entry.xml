@@ -1,36 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/margin_small"
-    android:orientation="horizontal">
+    android:layout_height="wrap_content">
 
-    <CheckBox
-        android:id="@+id/item_name_checkbox"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/store_name_textview"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_weight="1"
+        android:background="@android:color/holo_orange_dark"
+        android:gravity="center"
         android:textAppearance="?android:textAppearanceLarge"
-        tools:text="@string/dummy_item_name_text" />
+        tools:text="Dummy Store Name" />
 
-    <ImageButton
-        android:id="@+id/item_edit_btn"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/item_entry_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginLeft="@dimen/margin_small"
-        android:layout_marginRight="@dimen/margin_small"
-        android:background="@android:color/transparent"
-        android:src="@drawable/edit_icon" />
+        android:layout_margin="@dimen/margin_small"
+        android:orientation="horizontal">
 
-    <ImageButton
-        android:id="@+id/item_delete_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@android:color/transparent"
-        android:src="@drawable/delete_icon" />
+        <CheckBox
+            android:id="@+id/item_name_checkbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:textAppearance="?android:textAppearanceLarge"
+            tools:text="@string/dummy_item_name_text" />
 
-</LinearLayout>
+        <ImageButton
+            android:id="@+id/item_edit_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/margin_small"
+            android:layout_marginRight="@dimen/margin_small"
+            android:background="@android:color/transparent"
+            android:src="@drawable/edit_icon" />
+
+        <ImageButton
+            android:id="@+id/item_delete_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:src="@drawable/delete_icon" />
+
+    </LinearLayout>
+</RelativeLayout>
