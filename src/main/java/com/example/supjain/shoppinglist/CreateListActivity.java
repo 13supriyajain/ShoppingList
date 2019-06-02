@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.example.supjain.shoppinglist.ui.CreateListFragment;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 public class CreateListActivity extends AppCompatActivity {
 
@@ -16,9 +17,12 @@ public class CreateListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_list);
         setTitle(R.string.create_list_activity_title);
 
-        CreateListFragment createListFragment = new CreateListFragment();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.create_list_fragment_container, createListFragment, CREATE_LIST_FRAGMENT_TAG)
-                .commit();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentByTag(CREATE_LIST_FRAGMENT_TAG) == null) {
+            CreateListFragment createListFragment = new CreateListFragment();
+            fragmentManager.beginTransaction().add(R.id.create_list_fragment_container,
+                    createListFragment, CREATE_LIST_FRAGMENT_TAG)
+                    .commit();
+        }
     }
 }

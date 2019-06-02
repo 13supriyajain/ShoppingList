@@ -26,8 +26,8 @@
 
             <ImageView
                 android:id="@+id/list_type_image"
-                android:layout_width="@dimen/list_card_img_dimen"
-                android:layout_height="@dimen/list_card_img_dimen"
+                android:layout_width="@dimen/list_card_img_width"
+                android:layout_height="@dimen/list_card_img_height"
                 android:layout_gravity="center"
                 android:contentDescription="@string/list_type_image_content_desc"
                 android:scaleType="center"

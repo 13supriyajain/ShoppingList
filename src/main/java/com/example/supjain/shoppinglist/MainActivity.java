@@ -91,30 +91,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Item item3 = new Item(789L, "Oranges", 3, "kgs");
         itemList.add(item3);
 
-        Store store1 = new Store(987L, "Safeway", "", itemList);
+        Store store1 = new Store(987L, "Safeway", itemList);
         storeList.add(store1);
 
-        Store store2 = new Store(654L, "Sprouts", "", itemList);
+        Store store2 = new Store(654L, "Sprouts", itemList);
         storeList.add(store2);
 
-        Store store3 = new Store(321L, "Walgreens", "", itemList);
+        Store store3 = new Store(321L, "Walgreens", itemList);
         storeList.add(store3);
 
         ShoppingList shoppingList1 = new ShoppingList(111L, "Grocery",
-                ShoppingListType.GROCERY.toString(), R.drawable.default_list_img, storeList);
+                ShoppingListType.GROCERY.toString(), R.drawable.ic_grocery_list, storeList);
         lists.add(shoppingList1);
 
         ShoppingList shoppingList2 = new ShoppingList(222L, "Household",
-                ShoppingListType.HOUSEHOLD.toString(), R.drawable.default_list_img, storeList);
+                ShoppingListType.HOUSEHOLD.toString(), R.drawable.ic_household_stuff_list, storeList);
         lists.add(shoppingList2);
 
         ShoppingList shoppingList3 = new ShoppingList(333L, "Wedding",
-                ShoppingListType.WEDDING.toString(), R.drawable.default_list_img, storeList);
+                ShoppingListType.WEDDING.toString(), R.drawable.ic_wedding_list, storeList);
         lists.add(shoppingList3);
 
-        ShoppingList shoppingList4 = new ShoppingList(444L, "Trip",
-                ShoppingListType.TRIP.toString(), R.drawable.default_list_img, storeList);
+        ShoppingList shoppingList4 = new ShoppingList(444L, "Birthday",
+                ShoppingListType.BIRTHDAY.toString(), R.drawable.ic_birthday_list, storeList);
         lists.add(shoppingList4);
+
+        ShoppingList shoppingList5 = new ShoppingList(555L, "Road Trip",
+                ShoppingListType.ROAD_TRIP.toString(), R.drawable.ic_road_trip_list, storeList);
+        lists.add(shoppingList5);
+
+        ShoppingList shoppingList6 = new ShoppingList(666L, "Vacation",
+                ShoppingListType.VACATION.toString(), R.drawable.ic_vacation_list, storeList);
+        lists.add(shoppingList6);
+
+        ShoppingList shoppingList7 = new ShoppingList(777L, "Office Supply",
+                ShoppingListType.OFFICE_SUPPLY.toString(), R.drawable.ic_office_supply_list, storeList);
+        lists.add(shoppingList7);
+
+        ShoppingList shoppingList8 = new ShoppingList(888L, "Party",
+                ShoppingListType.PARTY.toString(), R.drawable.ic_party_list, storeList);
+        lists.add(shoppingList8);
+
+        ShoppingList shoppingList9 = new ShoppingList(999L, "Other",
+                ShoppingListType.OTHER.toString(), R.drawable.ic_default_list, storeList);
+        lists.add(shoppingList9);
 
         shoppingListsViewModel.setList(lists);
     }

@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_small"
             android:layout_weight="1"
+            android:inputType="textCapWords"
             android:hint="@string/list_name_edittext_hint" />
 
     </LinearLayout>

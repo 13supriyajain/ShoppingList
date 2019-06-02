@@ -22,7 +22,7 @@ public class BindingUtil {
         if (imageId > 0)
             view.setImageResource(imageId);
         else
-            view.setImageResource(R.drawable.default_list_img);
+            view.setImageResource(R.drawable.ic_default_list);
     }
 
     @SuppressLint("CrossDomainBindingAdapterIssue")

@@ -10,5 +10,6 @@
     <dimen name="padding_medium">16dp</dimen>
 
     <dimen name="divider_view_width">1dp</dimen>
-    <dimen name="list_card_img_dimen">150dp</dimen>
+    <dimen name="list_card_img_height">100dp</dimen>
+    <dimen name="list_card_img_width">175dp</dimen>
 </resources>

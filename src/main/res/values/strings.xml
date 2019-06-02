@@ -10,7 +10,7 @@
     <string name="item_name_edittext_hint">Enter item name (50 chars max)</string>
     <string name="item_quantity_edittext_hint">1</string>
     <string name="item_measure_edittext_hint">Measuring unit</string>
-    <string name="add_item_btn_text">Add item</string>
+    <string name="save_item_btn_text">Save item</string>
     <string name="store_name_label_text">Store Name:</string>
     <string name="store_name_edittext_hint">Enter name of the store</string>
     <string name="store_address_label_text">Address:</string>
@@ -18,7 +18,15 @@
     <string name="item_quantity_label_text">Quantity:</string>
     <string name="dummy_item_name_text">Dummy_item -- 1 Kg</string>
     <string name="create_list_activity_title">Create New List</string>
+    <string name="create_item_activity_title">Add New Item</string>
+    <string name="edit_item_activity_title">Edit Item</string>
     <string name="main_activity_title">Your Shopping Lists</string>
+    <string name="delete_item_alert_msg">Are you sure you want to delete this item ?</string>
+    <string name="delete_item_alert_confirm_text">Delete</string>
+    <string name="alert_dialog_cancel_text">Cancel</string>
+    <string name="discard_changes_alert_dialog_title">Discard changes ?</string>
+    <string name="discard_changes_alert_dialog_msg">Are you sure you want to discard changes ?</string>
+    <string name="discard_changes_alert_dialog_confirm_text">Discard</string>
 
     <string-array name="list_types_array">
         <item>Grocery</item>

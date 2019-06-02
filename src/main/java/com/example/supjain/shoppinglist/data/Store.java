@@ -20,23 +20,20 @@ public class Store implements Parcelable {
     };
     private long storeId;
     private String storeName;
-    private String storeLocation;
     private List<Item> items;
 
     public Store() {
     }
 
-    public Store(long storeId, String storeName, String storeLocation, List<Item> items) {
+    public Store(long storeId, String storeName, List<Item> items) {
         this.storeId = storeId;
         this.storeName = storeName;
-        this.storeLocation = storeLocation;
         this.items = items;
     }
 
     protected Store(Parcel in) {
         storeId = in.readLong();
         storeName = in.readString();
-        storeLocation = in.readString();
         items = in.createTypedArrayList(Item.CREATOR);
     }
 
@@ -56,14 +53,6 @@ public class Store implements Parcelable {
         this.storeName = storeName;
     }
 
-    public String getStoreLocation() {
-        return storeLocation;
-    }
-
-    public void setStoreLocation(String storeLocation) {
-        this.storeLocation = storeLocation;
-    }
-
     public List<Item> getItems() {
         return items;
     }
@@ -81,7 +70,6 @@ public class Store implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(storeId);
         dest.writeString(storeName);
-        dest.writeString(storeLocation);
         dest.writeTypedList(items);
     }
 }

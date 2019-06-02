@@ -37,7 +37,7 @@
             android:layout_marginLeft="@dimen/margin_small"
             android:layout_marginRight="@dimen/margin_small"
             android:background="@android:color/transparent"
-            android:src="@drawable/edit_icon" />
+            android:src="@drawable/ic_edit" />
 
         <ImageButton
             android:id="@+id/item_delete_btn"
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@android:color/transparent"
-            android:src="@drawable/delete_icon" />
+            android:src="@drawable/ic_delete" />
 
     </LinearLayout>
 </RelativeLayout>

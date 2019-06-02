@@ -3,8 +3,9 @@ package com.example.supjain.shoppinglist.data;
 public enum ShoppingListType {
     GROCERY,
     HOUSEHOLD,
+    VACATION,
+    ROAD_TRIP,
     PARTY,
-    TRIP,
     WEDDING,
     BIRTHDAY,
     OFFICE_SUPPLY,
