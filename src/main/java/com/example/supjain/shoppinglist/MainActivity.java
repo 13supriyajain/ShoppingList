@@ -1,5 +1,7 @@
 package com.example.supjain.shoppinglist;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,6 +16,7 @@ import com.example.supjain.shoppinglist.data.ShoppingListType;
 import com.example.supjain.shoppinglist.data.Store;
 import com.example.supjain.shoppinglist.util.ShoppingListUtil;
 import com.example.supjain.shoppinglist.viewmodel.ShoppingListsViewModel;
+import com.example.supjain.shoppinglist.widget.ShoppingListWidgetProvider;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -43,11 +46,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static FirebaseAuth firebaseAuth;
     private ShoppingListsViewModel shoppingListsViewModel;
+    private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    private boolean widgetConfigCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(R.string.main_activity_title);
+
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
+                    AppWidgetManager.INVALID_APPWIDGET_ID);
+            setResult(RESULT_CANCELED);
+            if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID)
+                widgetConfigCall = false;
+            else
+                widgetConfigCall = true;
+        }
 
         ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         binding.setLifecycleOwner(this);
@@ -228,11 +245,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void mRecyclerViewClick(ShoppingList list) {
-        Toast.makeText(this, "List selected: " + list.getShoppingListName(),
-                Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, DisplayShoppingListActivity.class);
-        intent.putParcelableArrayListExtra(STORE_LIST_OBJ_KEY, (ArrayList<Store>) list.getStores());
-        intent.putExtra(SHOPPING_LIST_NAME_KEY, list.getShoppingListName());
-        startActivity(intent);
+
+        // Update all widgets
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,
+                ShoppingListWidgetProvider.class));
+        ShoppingListWidgetProvider.updateAppWidgets(this, appWidgetManager, list, appWidgetIds);
+
+        if (widgetConfigCall) {
+            // Finish configuring widget
+            Intent resultValue = new Intent();
+            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            setResult(RESULT_OK, resultValue);
+            finish();
+        } else {
+            Toast.makeText(this, "List selected: " + list.getShoppingListName(),
+                    Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, DisplayShoppingListActivity.class);
+            intent.putParcelableArrayListExtra(STORE_LIST_OBJ_KEY, (ArrayList<Store>) list.getStores());
+            intent.putExtra(SHOPPING_LIST_NAME_KEY, list.getShoppingListName());
+            startActivity(intent);
+        }
     }
 }
