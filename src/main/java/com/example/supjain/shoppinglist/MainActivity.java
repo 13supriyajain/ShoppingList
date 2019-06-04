@@ -60,10 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             setResult(RESULT_CANCELED);
-            if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID)
-                widgetConfigCall = false;
-            else
-                widgetConfigCall = true;
+            widgetConfigCall = appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID;
         }
 
         ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);

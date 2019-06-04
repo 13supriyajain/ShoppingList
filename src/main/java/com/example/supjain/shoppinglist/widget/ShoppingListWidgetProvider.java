@@ -56,23 +56,24 @@ public class ShoppingListWidgetProvider extends AppWidgetProvider {
     // This method takes a shopping list and return a String containing information
     // about all the stores and items in the list, to be displayed in the widget.
     private static String getShoppingListData(ShoppingList shoppingList) {
-        String shoppingListData = "";
+        StringBuilder shoppingListData = new StringBuilder();
         if (shoppingList != null) {
-            shoppingListData += "<<" + shoppingList.getShoppingListName() + ">>\n------------\n";
+            shoppingListData.append("<<").append(shoppingList.getShoppingListName())
+                    .append(">>\n------------\n");
             List<Store> storeList = shoppingList.getStores();
             if (storeList != null && !storeList.isEmpty()) {
                 for (Store store : storeList) {
-                    shoppingListData += store.getStoreName() + ":\n";
+                    shoppingListData.append(store.getStoreName()).append(":\n");
                     List<Item> itemList = store.getItems();
                     if (itemList != null && !itemList.isEmpty()) {
                         for (Item item : itemList) {
-                            shoppingListData += item.toString() + "\n";
+                            shoppingListData.append(item.toString()).append("\n");
                         }
                     }
-                    shoppingListData += "------------\n";
+                    shoppingListData.append("------------\n");
                 }
             }
         }
-        return shoppingListData;
+        return shoppingListData.toString();
     }
 }
