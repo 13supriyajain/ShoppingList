@@ -20,6 +20,7 @@ public class Item implements Parcelable {
     private String itemName;
     private float itemQuantity;
     private String itemMeasurement;
+    private int itemMarkedPurchased;
 
     public Item() {
     }
@@ -29,6 +30,7 @@ public class Item implements Parcelable {
         this.itemName = itemName;
         this.itemQuantity = itemQuantity;
         this.itemMeasurement = itemMeasurement;
+        this.itemMarkedPurchased = 0; // Default value upon item creation
     }
 
     protected Item(Parcel in) {
@@ -36,6 +38,7 @@ public class Item implements Parcelable {
         itemName = in.readString();
         itemQuantity = in.readFloat();
         itemMeasurement = in.readString();
+        itemMarkedPurchased = in.readInt();
     }
 
     public long getItemId() {
@@ -70,6 +73,14 @@ public class Item implements Parcelable {
         this.itemMeasurement = itemMeasurement;
     }
 
+    public int getItemMarkedPurchased() {
+        return itemMarkedPurchased;
+    }
+
+    public void setItemMarkedPurchased(int itemMarkedPurchased) {
+        this.itemMarkedPurchased = itemMarkedPurchased;
+    }
+
     @Override
     public String toString() {
         return this.itemName + " -- " + this.itemQuantity + " " + this.itemMeasurement;
@@ -86,5 +97,6 @@ public class Item implements Parcelable {
         dest.writeString(itemName);
         dest.writeFloat(itemQuantity);
         dest.writeString(itemMeasurement);
+        dest.writeInt(itemMarkedPurchased);
     }
 }
