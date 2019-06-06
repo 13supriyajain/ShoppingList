@@ -157,12 +157,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (firebaseAuth.getCurrentUser() != null) {
             // already signed in
         } else {
-            startActivityForResult(
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setIsSmartLockEnabled(false)
-                            .build(),
-                    RC_SIGN_IN);
+            signIn();
         }
     }
 
@@ -200,15 +195,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void signOut() {
+    private void signOut() {
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     public void onComplete(@NonNull Task<Void> task) {
                         Toast.makeText(getApplicationContext(), "Signed out",
                                 Toast.LENGTH_SHORT).show();
+                        signIn();
                     }
                 });
+    }
+
+    private void signIn() {
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setIsSmartLockEnabled(false)
+                        .build(),
+                RC_SIGN_IN);
     }
 
     @Override
