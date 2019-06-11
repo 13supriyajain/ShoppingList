@@ -10,9 +10,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.supjain.shoppinglist.adapters.ShoppingListsAdapter;
-import com.example.supjain.shoppinglist.data.Item;
 import com.example.supjain.shoppinglist.data.ShoppingList;
-import com.example.supjain.shoppinglist.data.ShoppingListType;
 import com.example.supjain.shoppinglist.data.Store;
 import com.example.supjain.shoppinglist.util.ShoppingListUtil;
 import com.example.supjain.shoppinglist.viewmodel.ShoppingListsViewModel;
@@ -21,10 +19,16 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,19 +37,25 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import static com.example.supjain.shoppinglist.util.Constants.RC_CREATE_LIST;
 import static com.example.supjain.shoppinglist.util.Constants.RC_SIGN_IN;
 import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_NAME_KEY;
+import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_TYPE_KEY;
 import static com.example.supjain.shoppinglist.util.Constants.STORE_LIST_OBJ_KEY;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
         ShoppingListsAdapter.ShoppingListsAdapterOnClickHandler {
 
     private static FirebaseAuth firebaseAuth;
+    private FirebaseFirestore firebaseDb;
+    private FirebaseUser currentUser;
     private ShoppingListsViewModel shoppingListsViewModel;
+    private ShoppingListsAdapter shoppingListsAdapter;
     private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     private boolean widgetConfigCall;
 
@@ -67,96 +77,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         binding.setLifecycleOwner(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDb = FirebaseFirestore.getInstance();
         checkIfUserIsSignedIn();
-
-        shoppingListsViewModel = ViewModelProviders.of(this).get(ShoppingListsViewModel.class);
-        binding.setVariable(BR.viewModel, shoppingListsViewModel);
 
         FloatingActionButton createListFab = findViewById(R.id.create_list_fab);
         createListFab.setOnClickListener(this);
 
         RecyclerView recyclerView = findViewById(R.id.shoppinglists_recyclerview);
-        ShoppingListsAdapter shoppingListsAdapter = new ShoppingListsAdapter(this);
-
+        shoppingListsAdapter = new ShoppingListsAdapter(this);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this,
                 ShoppingListUtil.calculateNoOfColumns(this));
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(shoppingListsAdapter);
         recyclerView.setHasFixedSize(true);
 
+        shoppingListsViewModel = ViewModelProviders.of(this).get(ShoppingListsViewModel.class);
+        shoppingListsViewModel.getList().observe(this, new Observer<List<?>>() {
+            @Override
+            public void onChanged(List<?> list) {
+                if (list != null && !list.isEmpty() && list instanceof ShoppingList &&
+                        shoppingListsAdapter != null) {
+                    shoppingListsAdapter.setShoppingLists((List<ShoppingList>) list);
+                } else
+                    shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_shopping_list_err));
+            }
+        });
+        binding.setVariable(BR.viewModel, shoppingListsViewModel);
+
         fetchAndSetShoppingLists();
         binding.executePendingBindings();
-
-        // TODO: Put signin activity code in separate file/activity
     }
 
     private void fetchAndSetShoppingLists() {
 
-        List<ShoppingList> lists = new ArrayList<>();
-        List<Item> itemList = new ArrayList<>();
-        List<Store> storeList = new ArrayList<>();
-
-        Item item1 = new Item(123L, "Milk", 1, "gallon");
-        itemList.add(item1);
-
-        Item item2 = new Item(456L, "Apples", 5, "kgs");
-        itemList.add(item2);
-
-        Item item3 = new Item(789L, "Oranges", 3, "kgs");
-        itemList.add(item3);
-
-        Store store1 = new Store(987L, "Safeway", itemList);
-        storeList.add(store1);
-
-        Store store2 = new Store(654L, "Sprouts", itemList);
-        storeList.add(store2);
-
-        Store store3 = new Store(321L, "Walgreens", itemList);
-        storeList.add(store3);
-
-        ShoppingList shoppingList1 = new ShoppingList(111L, "Grocery",
-                ShoppingListType.GROCERY.toString(), R.drawable.ic_grocery_list, storeList);
-        lists.add(shoppingList1);
-
-        ShoppingList shoppingList2 = new ShoppingList(222L, "Household",
-                ShoppingListType.HOUSEHOLD.toString(), R.drawable.ic_household_stuff_list, storeList);
-        lists.add(shoppingList2);
-
-        ShoppingList shoppingList3 = new ShoppingList(333L, "Wedding",
-                ShoppingListType.WEDDING.toString(), R.drawable.ic_wedding_list, storeList);
-        lists.add(shoppingList3);
-
-        ShoppingList shoppingList4 = new ShoppingList(444L, "Birthday",
-                ShoppingListType.BIRTHDAY.toString(), R.drawable.ic_birthday_list, storeList);
-        lists.add(shoppingList4);
-
-        ShoppingList shoppingList5 = new ShoppingList(555L, "Road Trip",
-                ShoppingListType.ROAD_TRIP.toString(), R.drawable.ic_road_trip_list, storeList);
-        lists.add(shoppingList5);
-
-        ShoppingList shoppingList6 = new ShoppingList(666L, "Vacation",
-                ShoppingListType.VACATION.toString(), R.drawable.ic_vacation_list, storeList);
-        lists.add(shoppingList6);
-
-        ShoppingList shoppingList7 = new ShoppingList(777L, "Office Supply",
-                ShoppingListType.OFFICE_SUPPLY.toString(), R.drawable.ic_office_supply_list, storeList);
-        lists.add(shoppingList7);
-
-        ShoppingList shoppingList8 = new ShoppingList(888L, "Party",
-                ShoppingListType.PARTY.toString(), R.drawable.ic_party_list, storeList);
-        lists.add(shoppingList8);
-
-        ShoppingList shoppingList9 = new ShoppingList(999L, "Other",
-                ShoppingListType.OTHER.toString(), R.drawable.ic_default_list, storeList);
-        lists.add(shoppingList9);
-
+        // TODO: Add network connection check and cases to display error msg
+        final List<ShoppingList> lists = new ArrayList<>();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            firebaseDb.collection(userId)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    ShoppingList shoppingList = document.toObject(ShoppingList.class);
+                                    lists.add(shoppingList);
+                                }
+                                shoppingListsViewModel.setList(lists);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Data fetch failed",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
         shoppingListsViewModel.setList(lists);
     }
 
     private void checkIfUserIsSignedIn() {
-        if (firebaseAuth.getCurrentUser() != null) {
-            // already signed in
-        } else {
+        currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
             signIn();
         }
     }
@@ -170,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+                currentUser = firebaseAuth.getCurrentUser();
                 Toast.makeText(getApplicationContext(), "Signin successful", Toast.LENGTH_SHORT).show();
                 // ...
             } else {
@@ -192,6 +173,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 finish();
             }
+        } else if (requestCode == RC_CREATE_LIST && resultCode == RESULT_OK && data != null) {
+            String listName = data.getStringExtra(SHOPPING_LIST_NAME_KEY);
+            String listType = data.getStringExtra(SHOPPING_LIST_TYPE_KEY);
+
+            ShoppingList newShoppingList = new ShoppingList(listName,
+                    listType, ShoppingListUtil.getShoppingListTypeIcon(listType), null);
+            saveShoppingList(newShoppingList);
+        }
+    }
+
+    private void saveShoppingList(ShoppingList newShoppingList) {
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            firebaseDb.collection(userId)
+                    .add(newShoppingList)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Toast.makeText(getApplicationContext(), "List has been stored successfully",
+                                    Toast.LENGTH_SHORT).show();
+                            fetchAndSetShoppingLists();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), "List couldn't be stored !",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
     }
 
@@ -241,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (id) {
             case R.id.create_list_fab:
                 Intent intent = new Intent(this, CreateListActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, RC_CREATE_LIST);
         }
     }
 

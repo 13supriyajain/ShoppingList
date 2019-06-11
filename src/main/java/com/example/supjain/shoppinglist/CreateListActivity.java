@@ -1,5 +1,6 @@
 package com.example.supjain.shoppinglist;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.supjain.shoppinglist.ui.CreateListFragment;
@@ -7,7 +8,10 @@ import com.example.supjain.shoppinglist.ui.CreateListFragment;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
-public class CreateListActivity extends AppCompatActivity {
+import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_NAME_KEY;
+import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_TYPE_KEY;
+
+public class CreateListActivity extends AppCompatActivity implements CreateListFragment.CreateListReqHandler {
 
     private static final String CREATE_LIST_FRAGMENT_TAG = "CreateListFragmentTag";
 
@@ -24,5 +28,14 @@ public class CreateListActivity extends AppCompatActivity {
                     createListFragment, CREATE_LIST_FRAGMENT_TAG)
                     .commit();
         }
+    }
+
+    @Override
+    public void onCreateListBtnClick(String listName, String listType) {
+        Intent intent = new Intent();
+        intent.putExtra(SHOPPING_LIST_NAME_KEY, listName);
+        intent.putExtra(SHOPPING_LIST_TYPE_KEY, listType);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

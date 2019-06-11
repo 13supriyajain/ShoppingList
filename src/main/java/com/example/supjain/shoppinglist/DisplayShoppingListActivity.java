@@ -11,7 +11,7 @@ import android.widget.Toast;
 import com.example.supjain.shoppinglist.adapters.ItemListAdapter;
 import com.example.supjain.shoppinglist.data.Item;
 import com.example.supjain.shoppinglist.data.Store;
-import com.example.supjain.shoppinglist.viewmodel.ShoppingListsViewModel;
+import com.example.supjain.shoppinglist.viewmodel.ItemListViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -35,7 +35,7 @@ import static com.example.supjain.shoppinglist.util.Constants.UNCHECK_ITEM_OP;
 public class DisplayShoppingListActivity extends AppCompatActivity implements View.OnClickListener,
         ItemListAdapter.ItemListAdapterOnClickHandler {
 
-    private ShoppingListsViewModel shoppingListsViewModel;
+    private ItemListViewModel itemListViewModel;
     private List<Store> storeList;
 
     @Override
@@ -50,9 +50,9 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         setTitle(listName);
 
         storeList = intent.getParcelableArrayListExtra(STORE_LIST_OBJ_KEY);
-        shoppingListsViewModel = ViewModelProviders.of(this).get(ShoppingListsViewModel.class);
-        shoppingListsViewModel.setList(storeList);
-        binding.setVariable(BR.viewModel, shoppingListsViewModel);
+        itemListViewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
+        itemListViewModel.setList(storeList);
+        binding.setVariable(BR.viewModel, itemListViewModel);
 
         FloatingActionButton addItemFab = findViewById(R.id.add_item_fab);
         addItemFab.setOnClickListener(this);

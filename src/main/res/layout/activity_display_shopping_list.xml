@@ -10,7 +10,7 @@
 
         <variable
             name="viewModel"
-            type="com.example.supjain.shoppinglist.viewmodel.ShoppingListsViewModel" />
+            type="com.example.supjain.shoppinglist.viewmodel.ItemListViewModel" />
     </data>
 
     <RelativeLayout

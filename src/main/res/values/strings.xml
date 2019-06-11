@@ -24,17 +24,22 @@
     <string name="delete_item_alert_msg">Are you sure you want to delete this item ?</string>
     <string name="delete_item_alert_confirm_text">Delete</string>
     <string name="alert_dialog_cancel_text">Cancel</string>
+    <string name="alert_dialog_ok_text">Ok</string>
     <string name="discard_changes_alert_dialog_title">Discard changes ?</string>
     <string name="discard_changes_alert_dialog_msg">Are you sure you want to discard changes ?</string>
     <string name="discard_changes_alert_dialog_confirm_text">Discard</string>
+    <string name="create_list_err_invalid_name">Please enter a valid list name !</string>
+    <string name="no_shopping_list_err">You have no shopping lists currently !\nCreate one now !!</string>
+    <string name="no_connection_err_msg">No internet connection.\nPlease try again later !</string>
 
     <string-array name="list_types_array">
         <item>Grocery</item>
         <item>Household Stuff</item>
         <item>Party</item>
-        <item>Trip</item>
         <item>Wedding</item>
         <item>Birthday</item>
+        <item>Road Trip</item>
+        <item>Vacation</item>
         <item>Office Supply</item>
         <item>Other</item>
     </string-array>

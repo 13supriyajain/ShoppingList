@@ -5,6 +5,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.DisplayMetrics;
 
+import com.example.supjain.shoppinglist.R;
+
 /**
  * This is a helper class containing helper methods.
  */
@@ -23,5 +25,37 @@ public class ShoppingListUtil {
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public static int getShoppingListTypeIcon(String listType) {
+        int listTypeIcon = R.drawable.ic_default_list;
+
+        switch (listType) {
+            case "Grocery":
+                listTypeIcon = R.drawable.ic_grocery_list;
+                break;
+            case "Household Stuff":
+                listTypeIcon = R.drawable.ic_household_stuff_list;
+                break;
+            case "Party":
+                listTypeIcon = R.drawable.ic_party_list;
+                break;
+            case "Birthday":
+                listTypeIcon = R.drawable.ic_birthday_list;
+                break;
+            case "Road Trip":
+                listTypeIcon = R.drawable.ic_road_trip_list;
+                break;
+            case "Vacation":
+                listTypeIcon = R.drawable.ic_vacation_list;
+                break;
+            case "Wedding":
+                listTypeIcon = R.drawable.ic_wedding_list;
+                break;
+            case "Office Supply":
+                listTypeIcon = R.drawable.ic_office_supply_list;
+                break;
+        }
+        return listTypeIcon;
     }
 }

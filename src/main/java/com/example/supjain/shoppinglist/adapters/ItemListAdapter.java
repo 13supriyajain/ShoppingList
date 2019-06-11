@@ -59,7 +59,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ItemLi
     @Override
     public int getItemCount() {
         int count = 0;
-        if (!storesList.isEmpty()) {
+        if (storesList != null && !storesList.isEmpty()) {
             count = storesList.size();
             for (Store store : storesList) {
                 List<Item> itemsList = store.getItems();

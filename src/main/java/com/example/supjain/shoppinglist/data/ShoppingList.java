@@ -4,7 +4,6 @@ import java.util.List;
 
 public class ShoppingList {
 
-    private long shoppingListId;
     private String shoppingListName;
     private String shoppingListType;
     private int shoppingListImageId = -1;
@@ -13,21 +12,12 @@ public class ShoppingList {
     public ShoppingList() {
     }
 
-    public ShoppingList(long shoppingListId, String shoppingListName, String shoppingListType,
+    public ShoppingList(String shoppingListName, String shoppingListType,
                         int shoppingListImageId, List<Store> stores) {
-        this.shoppingListId = shoppingListId;
         this.shoppingListName = shoppingListName;
         this.shoppingListType = shoppingListType;
         this.shoppingListImageId = shoppingListImageId;
         this.stores = stores;
-    }
-
-    public long getShoppingListId() {
-        return shoppingListId;
-    }
-
-    public void setShoppingListId(long shoppingListId) {
-        this.shoppingListId = shoppingListId;
     }
 
     public String getShoppingListName() {

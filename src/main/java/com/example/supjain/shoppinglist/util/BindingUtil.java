@@ -28,7 +28,7 @@ public class BindingUtil {
     @SuppressLint("CrossDomainBindingAdapterIssue")
     @BindingAdapter({"listdata"})
     public static void setList(RecyclerView view, List<?> data) {
-        if (!data.isEmpty()) {
+        if (data != null && !data.isEmpty()) {
             if (data.get(0) instanceof ShoppingList) {
                 ShoppingListsAdapter adapter = (ShoppingListsAdapter) view.getAdapter();
                 if (adapter != null)
@@ -39,6 +39,5 @@ public class BindingUtil {
                     adapter.setStoresList((List<Store>) data);
             }
         }
-
     }
 }

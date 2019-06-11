@@ -2,7 +2,7 @@ package com.example.supjain.shoppinglist.viewmodel;
 
 import android.app.Application;
 
-import com.example.supjain.shoppinglist.data.ShoppingList;
+import com.example.supjain.shoppinglist.data.Store;
 
 import java.util.List;
 
@@ -11,12 +11,12 @@ import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
-public class ShoppingListsViewModel extends AndroidViewModel {
+public class ItemListViewModel extends AndroidViewModel {
 
-    public MutableLiveData<List<ShoppingList>> list = new MutableLiveData<>();
+    public MutableLiveData<List<Store>> list = new MutableLiveData<>();
     public ObservableField<String> errorMsg;
 
-    public ShoppingListsViewModel(@NonNull Application application) {
+    public ItemListViewModel(@NonNull Application application) {
         super(application);
     }
 
@@ -24,11 +24,11 @@ public class ShoppingListsViewModel extends AndroidViewModel {
         this.errorMsg = new ObservableField<>(errorMsg);
     }
 
-    public MutableLiveData<List<ShoppingList>> getList() {
+    public MutableLiveData<List<Store>> getList() {
         return this.list;
     }
 
-    public void setList(List<ShoppingList> list) {
+    public void setList(List<Store> list) {
         this.list.setValue(list);
     }
 }
