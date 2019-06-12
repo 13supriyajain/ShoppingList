@@ -13,6 +13,9 @@ import com.example.supjain.shoppinglist.data.Item;
 import com.example.supjain.shoppinglist.data.Store;
 import com.example.supjain.shoppinglist.viewmodel.ItemListViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -20,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,10 +41,17 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
 
     private ItemListViewModel itemListViewModel;
     private List<Store> storeList;
+    private static FirebaseAuth firebaseAuth;
+    private ItemListAdapter itemListAdapter;
+    private FirebaseFirestore firebaseDb;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDb = FirebaseFirestore.getInstance();
 
         ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_display_shopping_list);
         binding.setLifecycleOwner(this);
@@ -49,22 +60,35 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         String listName = intent.getStringExtra(SHOPPING_LIST_NAME_KEY);
         setTitle(listName);
 
-        storeList = intent.getParcelableArrayListExtra(STORE_LIST_OBJ_KEY);
-        itemListViewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
-        itemListViewModel.setList(storeList);
-        binding.setVariable(BR.viewModel, itemListViewModel);
-
         FloatingActionButton addItemFab = findViewById(R.id.add_item_fab);
         addItemFab.setOnClickListener(this);
 
         RecyclerView recyclerView = findViewById(R.id.item_list_recyclerview);
-        ItemListAdapter itemListAdapter = new ItemListAdapter(this);
-
+        itemListAdapter = new ItemListAdapter(this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(itemListAdapter);
         recyclerView.setHasFixedSize(true);
 
+        itemListViewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
+        itemListViewModel.getList().observe(this, new Observer<List<Store>>() {
+            @Override
+            public void onChanged(List<Store> list) {
+                if (list != null && !list.isEmpty() && itemListAdapter != null) {
+                    itemListAdapter.setStoresList(list);
+                } else {
+                    itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
+                    itemListViewModel.setList(null);
+                }
+            }
+        });
+        storeList = intent.getParcelableArrayListExtra(STORE_LIST_OBJ_KEY);
+        if (storeList == null || storeList.isEmpty()) {
+            itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
+            itemListViewModel.setList(null);
+        } else
+            itemListViewModel.setList(storeList);
+        binding.setVariable(BR.viewModel, itemListViewModel);
         binding.executePendingBindings();
     }
 

@@ -29,8 +29,13 @@
     <string name="discard_changes_alert_dialog_msg">Are you sure you want to discard changes ?</string>
     <string name="discard_changes_alert_dialog_confirm_text">Discard</string>
     <string name="create_list_err_invalid_name">Please enter a valid list name !</string>
-    <string name="no_shopping_list_err">You have no shopping lists currently !\nCreate one now !!</string>
+    <string name="no_shopping_list_err_msg">You have no shopping lists currently !\nCreate one now !!</string>
+    <string name="no_item_err_msg">You have no items in your shopping list currently !\nAdd one now !!</string>
     <string name="no_connection_err_msg">No internet connection.\nPlease try again later !</string>
+    <string name="failure_err_msg">Technical error !\nPlease try again later.</string>
+    <string name="failure_err_title">Error</string>
+    <string name="list_name_exists_err_title">List name already exists</string>
+    <string name="list_name_exists_err_msg">Please use a different unique name for your new shopping list !</string>
 
     <string-array name="list_types_array">
         <item>Grocery</item>

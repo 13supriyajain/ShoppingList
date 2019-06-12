@@ -98,13 +98,13 @@ public class CreateListFragment extends Fragment implements AdapterView.OnItemSe
     }
 
     private boolean isInvalidListName(String listName) {
-        // TODO: check if list name already exists for the user
         return TextUtils.isEmpty(listName) || listName.length() > LIST_NAME_MAX_LENGTH;
     }
 
     private void showErrorAlertDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
-        alertDialog.setTitle(R.string.create_list_err_invalid_name);
+        alertDialog.setTitle(R.string.failure_err_title);
+        alertDialog.setMessage(R.string.create_list_err_invalid_name);
         alertDialog.setNegativeButton(R.string.alert_dialog_ok_text, null);
         alertDialog.show();
     }

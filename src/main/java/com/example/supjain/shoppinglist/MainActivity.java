@@ -1,5 +1,6 @@
 package com.example.supjain.shoppinglist;
 
+import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -92,14 +93,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recyclerView.setHasFixedSize(true);
 
         shoppingListsViewModel = ViewModelProviders.of(this).get(ShoppingListsViewModel.class);
-        shoppingListsViewModel.getList().observe(this, new Observer<List<?>>() {
+        shoppingListsViewModel.getList().observe(this, new Observer<List<ShoppingList>>() {
             @Override
-            public void onChanged(List<?> list) {
-                if (list != null && !list.isEmpty() && list instanceof ShoppingList &&
-                        shoppingListsAdapter != null) {
-                    shoppingListsAdapter.setShoppingLists((List<ShoppingList>) list);
-                } else
-                    shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_shopping_list_err));
+            public void onChanged(List<ShoppingList> list) {
+                if (list != null && !list.isEmpty() && shoppingListsAdapter != null) {
+                    shoppingListsAdapter.setShoppingLists(list);
+                } else {
+                    shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_shopping_list_err_msg));
+                    shoppingListsViewModel.setList(null);
+                }
             }
         });
         binding.setVariable(BR.viewModel, shoppingListsViewModel);
@@ -109,30 +111,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void fetchAndSetShoppingLists() {
-
-        // TODO: Add network connection check and cases to display error msg
-        final List<ShoppingList> lists = new ArrayList<>();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
-            firebaseDb.collection(userId)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    ShoppingList shoppingList = document.toObject(ShoppingList.class);
-                                    lists.add(shoppingList);
+        if (!ShoppingListUtil.hasNetworkConnection(this)) {
+            shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_connection_err_msg));
+            shoppingListsViewModel.setList(null);
+        } else {
+            final List<ShoppingList> lists = new ArrayList<>();
+            if (currentUser != null) {
+                String userId = currentUser.getUid();
+                firebaseDb.collection(userId)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        ShoppingList shoppingList = document.toObject(ShoppingList.class);
+                                        lists.add(shoppingList);
+                                    }
+                                    shoppingListsViewModel.setList(lists);
+                                } else {
+                                    shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.failure_err_msg));
+                                    shoppingListsViewModel.setList(null);
                                 }
-                                shoppingListsViewModel.setList(lists);
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Data fetch failed",
-                                        Toast.LENGTH_SHORT).show();
                             }
-                        }
-                    });
+                        });
+            }
+            shoppingListsViewModel.setList(lists);
         }
-        shoppingListsViewModel.setList(lists);
     }
 
     private void checkIfUserIsSignedIn() {
@@ -179,31 +184,69 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             ShoppingList newShoppingList = new ShoppingList(listName,
                     listType, ShoppingListUtil.getShoppingListTypeIcon(listType), null);
-            saveShoppingList(newShoppingList);
+            validateAndSaveShoppingList(newShoppingList);
         }
     }
 
-    private void saveShoppingList(ShoppingList newShoppingList) {
-        if (currentUser != null) {
+    private void validateAndSaveShoppingList(ShoppingList newShoppingList) {
+        if (!ShoppingListUtil.hasNetworkConnection(this)) {
+            showErrorAlertDialog(R.string.failure_err_title, R.string.no_connection_err_msg);
+        } else if (currentUser != null) {
             String userId = currentUser.getUid();
-            firebaseDb.collection(userId)
-                    .add(newShoppingList)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            Toast.makeText(getApplicationContext(), "List has been stored successfully",
-                                    Toast.LENGTH_SHORT).show();
-                            fetchAndSetShoppingLists();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getApplicationContext(), "List couldn't be stored !",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
+            checkIfListNameAlreadyExists(userId, newShoppingList);
         }
+    }
+
+    private void checkIfListNameAlreadyExists(final String userId, final ShoppingList newShoppingList) {
+        firebaseDb.collection(userId)
+                .whereEqualTo("shoppingListName", newShoppingList.getShoppingListName())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (task.getResult() == null || task.getResult().isEmpty()) {
+                                storeShoppingList(userId, newShoppingList);
+                            } else {
+                                showErrorAlertDialog(R.string.list_name_exists_err_title,
+                                        R.string.list_name_exists_err_msg);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        showErrorAlertDialog(R.string.failure_err_title, R.string.failure_err_msg);
+                    }
+                });
+    }
+
+    private void storeShoppingList(String userId, ShoppingList newShoppingList) {
+        firebaseDb.collection(userId)
+                .add(newShoppingList)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Toast.makeText(getApplicationContext(), "List has been stored successfully",
+                                Toast.LENGTH_SHORT).show();
+                        fetchAndSetShoppingLists();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        showErrorAlertDialog(R.string.failure_err_title, R.string.failure_err_msg);
+                    }
+                });
+    }
+
+    private void showErrorAlertDialog(int errTitleId, int errMsgId) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(errTitleId);
+        alertDialog.setMessage(errMsgId);
+        alertDialog.setNegativeButton(R.string.alert_dialog_ok_text, null);
+        alertDialog.show();
     }
 
     private void signOut() {
