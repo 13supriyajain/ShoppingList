@@ -62,11 +62,7 @@ public class CreateListFragment extends Fragment implements AdapterView.OnItemSe
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        try {
-            createListReqHandler = (CreateListReqHandler) getActivity();
-        } catch (ClassCastException e) {
-        }
+        createListReqHandler = (CreateListReqHandler) getActivity();
     }
 
     @Override

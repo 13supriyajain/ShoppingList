@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Store implements Parcelable {
 
@@ -18,30 +19,32 @@ public class Store implements Parcelable {
             return new Store[size];
         }
     };
-    private long storeId;
+
+    private static AtomicInteger uniqueId = new AtomicInteger();
+    private int storeId;
     private String storeName;
     private List<Item> items;
 
     public Store() {
     }
 
-    public Store(long storeId, String storeName, List<Item> items) {
-        this.storeId = storeId;
+    public Store(String storeName, List<Item> items) {
+        this.storeId = uniqueId.getAndIncrement();
         this.storeName = storeName;
         this.items = items;
     }
 
     protected Store(Parcel in) {
-        storeId = in.readLong();
+        storeId = in.readInt();
         storeName = in.readString();
         items = in.createTypedArrayList(Item.CREATOR);
     }
 
-    public long getStoreId() {
+    public int getStoreId() {
         return storeId;
     }
 
-    public void setStoreId(long storeId) {
+    public void setStoreId(int storeId) {
         this.storeId = storeId;
     }
 
@@ -68,7 +71,7 @@ public class Store implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(storeId);
+        dest.writeInt(storeId);
         dest.writeString(storeName);
         dest.writeTypedList(items);
     }

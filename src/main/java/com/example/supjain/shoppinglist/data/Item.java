@@ -3,6 +3,8 @@ package com.example.supjain.shoppinglist.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Item implements Parcelable {
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -16,37 +18,38 @@ public class Item implements Parcelable {
             return new Item[size];
         }
     };
-    private long itemId;
+
+    private static AtomicInteger uniqueId = new AtomicInteger();
+    private int itemId;
     private String itemName;
     private float itemQuantity;
     private String itemMeasurement;
     private int itemMarkedPurchased;
+    private int itemStoreId;
 
     public Item() {
     }
 
-    public Item(long itemId, String itemName, float itemQuantity, String itemMeasurement) {
-        this.itemId = itemId;
+    public Item(String itemName, float itemQuantity, String itemMeasurement) {
+        this.itemId = uniqueId.getAndIncrement();
         this.itemName = itemName;
         this.itemQuantity = itemQuantity;
         this.itemMeasurement = itemMeasurement;
+        this.itemStoreId = -1; // Default value upon item creation
         this.itemMarkedPurchased = 0; // Default value upon item creation
     }
 
     protected Item(Parcel in) {
-        itemId = in.readLong();
+        itemId = in.readInt();
         itemName = in.readString();
         itemQuantity = in.readFloat();
         itemMeasurement = in.readString();
         itemMarkedPurchased = in.readInt();
+        itemStoreId = in.readInt();
     }
 
-    public long getItemId() {
+    public int getItemId() {
         return itemId;
-    }
-
-    public void setItemId(long itemId) {
-        this.itemId = itemId;
     }
 
     public String getItemName() {
@@ -81,6 +84,14 @@ public class Item implements Parcelable {
         this.itemMarkedPurchased = itemMarkedPurchased;
     }
 
+    public int getItemStoreId() {
+        return itemStoreId;
+    }
+
+    public void setItemStoreId(int itemStoreId) {
+        this.itemStoreId = itemStoreId;
+    }
+
     @Override
     public String toString() {
         return this.itemName + " -- " + this.itemQuantity + " " + this.itemMeasurement;
@@ -93,10 +104,11 @@ public class Item implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(itemId);
+        dest.writeInt(itemId);
         dest.writeString(itemName);
         dest.writeFloat(itemQuantity);
         dest.writeString(itemMeasurement);
         dest.writeInt(itemMarkedPurchased);
+        dest.writeInt(itemStoreId);
     }
 }
