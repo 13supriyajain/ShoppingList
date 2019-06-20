@@ -7,21 +7,24 @@ import com.example.supjain.shoppinglist.data.ShoppingList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 public class ShoppingListsViewModel extends AndroidViewModel {
 
     public MutableLiveData<List<ShoppingList>> list = new MutableLiveData<>();
-    public ObservableField<String> errorMsg;
+    public MutableLiveData<String> errorMsg = new MutableLiveData<>();
 
     public ShoppingListsViewModel(@NonNull Application application) {
         super(application);
     }
 
+    public MutableLiveData<String> getErrorMsg() {
+        return this.errorMsg;
+    }
+
     public void setErrorMsg(String errorMsg) {
-        this.errorMsg = new ObservableField<>(errorMsg);
+        this.errorMsg.setValue(errorMsg);
     }
 
     public MutableLiveData<List<ShoppingList>> getList() {

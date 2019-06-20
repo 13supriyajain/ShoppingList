@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.supjain.shoppinglist.adapters.ItemListAdapter;
@@ -72,6 +74,9 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         FloatingActionButton addItemFab = findViewById(R.id.add_item_fab);
         addItemFab.setOnClickListener(this);
 
+        final TextView errMsgTextView = findViewById(R.id.item_list_network_err_msg);
+        final ProgressBar progressBar = findViewById(R.id.item_list_progressbar);
+
         RecyclerView recyclerView = findViewById(R.id.item_list_recyclerview);
         itemListAdapter = new ItemListAdapter(this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -83,18 +88,30 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         itemListViewModel.getList().observe(this, new Observer<List<Store>>() {
             @Override
             public void onChanged(List<Store> list) {
-                if (list != null && !list.isEmpty() && itemListAdapter != null)
+                if (list != null && !list.isEmpty() && itemListAdapter != null) {
                     itemListAdapter.setStoresList(list);
-                else
+                    errMsgTextView.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
+                } else
                     itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
             }
         });
+        itemListViewModel.getErrorMsg().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String errMsg) {
+                errMsgTextView.setText(errMsg);
+                errMsgTextView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                itemListAdapter.setStoresList(null);
+            }
+        });
+
         storeList = intent.getParcelableArrayListExtra(STORE_LIST_OBJ_KEY);
-        if (storeList == null || storeList.isEmpty()) {
+        if (storeList == null || storeList.isEmpty())
             itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
-            itemListViewModel.setList(null);
-        } else
+        else
             itemListViewModel.setList(storeList);
+
         binding.setVariable(BR.viewModel, itemListViewModel);
         binding.executePendingBindings();
     }

@@ -14,7 +14,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.example.supjain.shoppinglist.R;
 
@@ -83,11 +82,9 @@ public class CreateListFragment extends Fragment implements AdapterView.OnItemSe
                 String listName = null;
                 if (listnameEditText != null)
                     listName = listnameEditText.getText().toString();
-
-                if (!isInvalidListName(listName)) {
+                if (!isInvalidListName(listName))
                     createListReqHandler.onCreateListBtnClick(listName, listTypeSelected);
-                    Toast.makeText(getContext(), "List created", Toast.LENGTH_SHORT).show();
-                } else
+                else
                     showErrorAlertDialog();
                 break;
         }

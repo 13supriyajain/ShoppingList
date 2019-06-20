@@ -112,6 +112,10 @@ public class CreateItemFragment extends Fragment implements View.OnClickListener
         float quantityValue = 0;
         if (itemQuantityEditText != null) {
             String quantityValueText = itemQuantityEditText.getText().toString();
+            if (TextUtils.isEmpty(quantityValueText)) {
+                showErrorAlertDialog(R.string.invalid_item_qty_err_msg);
+                return;
+            }
             quantityValue = Float.valueOf(quantityValueText);
             if (quantityValue <= 0) {
                 showErrorAlertDialog(R.string.invalid_item_qty_err_msg);

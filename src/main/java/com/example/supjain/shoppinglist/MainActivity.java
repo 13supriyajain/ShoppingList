@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.supjain.shoppinglist.adapters.ShoppingListsAdapter;
@@ -84,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FloatingActionButton createListFab = findViewById(R.id.create_list_fab);
         createListFab.setOnClickListener(this);
 
+        final TextView errMsgTextView = findViewById(R.id.network_err_msg);
+        final ProgressBar progressBar = findViewById(R.id.progressbar);
+
         RecyclerView recyclerView = findViewById(R.id.shoppinglists_recyclerview);
         shoppingListsAdapter = new ShoppingListsAdapter(this);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this,
@@ -98,10 +103,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onChanged(List<ShoppingList> list) {
                 if (list != null && !list.isEmpty() && shoppingListsAdapter != null) {
                     shoppingListsAdapter.setShoppingLists(list);
-                } else {
+                    errMsgTextView.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
+                } else
                     shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_shopping_list_err_msg));
-                    shoppingListsViewModel.setList(null);
-                }
+            }
+        });
+        shoppingListsViewModel.getErrorMsg().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String errMsg) {
+                errMsgTextView.setText(errMsg);
+                errMsgTextView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                shoppingListsAdapter.setShoppingLists(null);
             }
         });
         binding.setVariable(BR.viewModel, shoppingListsViewModel);
@@ -136,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         });
             }
-            shoppingListsViewModel.setList(lists);
         }
     }
 
@@ -158,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // Successfully signed in
                 currentUser = firebaseAuth.getCurrentUser();
                 Toast.makeText(getApplicationContext(), "Signin successful", Toast.LENGTH_SHORT).show();
-                // ...
+                fetchAndSetShoppingLists();
             } else {
                 // Sign in failed
                 if (response == null) {
