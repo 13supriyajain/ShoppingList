@@ -24,16 +24,8 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@{viewModel.errorMsg}"
-            android:textColor="@android:color/white"
             android:visibility="@{viewModel.errorMsg != null ? View.VISIBLE : View.GONE}"
             tools:text="No internet connection.\nPlease try again later !" />
-
-        <ProgressBar
-            android:id="@+id/item_list_progressbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="@{(viewModel.list == null || viewModel.list.isEmpty() &amp;&amp; viewModel.errorMsg == null) ? View.VISIBLE : View.GONE}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/item_list_recyclerview"

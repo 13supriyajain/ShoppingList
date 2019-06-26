@@ -28,7 +28,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -143,10 +143,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         lists.add(shoppingList);
                                     }
                                     shoppingListsViewModel.setList(lists);
-                                } else {
+                                } else
                                     shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.failure_err_msg));
-                                    shoppingListsViewModel.setList(null);
-                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.failure_err_msg));
                             }
                         });
             }
@@ -206,19 +210,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             showErrorAlertDialog(R.string.failure_err_title, R.string.no_connection_err_msg);
         } else if (currentUser != null) {
             String userId = currentUser.getUid();
-            checkIfListNameAlreadyExists(userId, newShoppingList);
+            checkIfListAlreadyExists(userId, newShoppingList);
         }
     }
 
-    private void checkIfListNameAlreadyExists(final String userId, final ShoppingList newShoppingList) {
+    private void checkIfListAlreadyExists(final String userId, final ShoppingList newShoppingList) {
         firebaseDb.collection(userId)
-                .whereEqualTo("shoppingListName", newShoppingList.getShoppingListName())
+                .document(newShoppingList.getShoppingListName())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (task.getResult() == null || task.getResult().isEmpty()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document == null || !document.exists()) {
                                 storeShoppingList(userId, newShoppingList);
                             } else {
                                 showErrorAlertDialog(R.string.list_name_exists_err_title,
@@ -237,10 +242,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void storeShoppingList(String userId, ShoppingList newShoppingList) {
         firebaseDb.collection(userId)
-                .add(newShoppingList)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                .document(newShoppingList.getShoppingListName())
+                .set(newShoppingList)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
+                    public void onSuccess(Void aVoid) {
                         Toast.makeText(getApplicationContext(), "List has been stored successfully",
                                 Toast.LENGTH_SHORT).show();
                         fetchAndSetShoppingLists();

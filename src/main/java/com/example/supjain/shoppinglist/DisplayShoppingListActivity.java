@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,7 +74,6 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         addItemFab.setOnClickListener(this);
 
         final TextView errMsgTextView = findViewById(R.id.item_list_network_err_msg);
-        final ProgressBar progressBar = findViewById(R.id.item_list_progressbar);
 
         RecyclerView recyclerView = findViewById(R.id.item_list_recyclerview);
         itemListAdapter = new ItemListAdapter(this);
@@ -85,13 +83,13 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         recyclerView.setHasFixedSize(true);
 
         itemListViewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
+        binding.setVariable(BR.viewModel, itemListViewModel);
         itemListViewModel.getList().observe(this, new Observer<List<Store>>() {
             @Override
             public void onChanged(List<Store> list) {
                 if (list != null && !list.isEmpty() && itemListAdapter != null) {
                     itemListAdapter.setStoresList(list);
                     errMsgTextView.setVisibility(View.GONE);
-                    progressBar.setVisibility(View.GONE);
                 } else
                     itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
             }
@@ -101,7 +99,6 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
             public void onChanged(String errMsg) {
                 errMsgTextView.setText(errMsg);
                 errMsgTextView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
                 itemListAdapter.setStoresList(null);
             }
         });
@@ -112,7 +109,6 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         else
             itemListViewModel.setList(storeList);
 
-        binding.setVariable(BR.viewModel, itemListViewModel);
         binding.executePendingBindings();
     }
 
@@ -128,7 +124,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
     }
 
     @Override
-    public void mClick(String operation, Item item) {
+    public void mClick(String operation, final Item item) {
         Toast.makeText(this, operation + " on " + item.getItemName() + " clicked",
                 Toast.LENGTH_SHORT).show();
         CheckBox checkBox;
@@ -145,8 +141,9 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getBaseContext(), "Item deleted", Toast.LENGTH_SHORT).show();
                                 dialog.dismiss();
+                                deleteItem(item);
+                                Toast.makeText(getBaseContext(), "Item deleted", Toast.LENGTH_SHORT).show();
                             }
                         });
                 dialog.setNegativeButton(getString(R.string.alert_dialog_cancel_text), null);
@@ -171,22 +168,11 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
             Item item = data.getParcelableExtra(ITEM_OBJ_KEY);
             String storeName = data.getStringExtra(STORE_NAME_KEY);
 
-            if (storeName == null && item != null) {
-                int storeId = item.getItemStoreId();
-                if (storeId != -1) {
-                    int storeObjIndex = getIndexIfStoreObjAlreadyExists(storeId, storeList);
-                    if (storeObjIndex != -1) {
-                        Store storeObj = storeList.get(storeObjIndex);
-                        List<Item> itemList = storeObj.getItems();
-                        int itemObjIndex = getIndexIfItemObjAlreadyExists(item.getItemId(), itemList);
-                        if (itemObjIndex != -1) {
-                            itemList.set(itemObjIndex, item);
-                        }
-                    }
-                }
+            if (storeName == null) {
+                updateItemInStoreList(item, EDIT_ITEM_OP);
             } else if (!TextUtils.isEmpty(storeName)) {
                 if (storeList != null && !storeList.isEmpty()) {
-                    int storeObjIndex = getIndexIfStoreObjAlreadyExists(storeName, storeList);
+                    int storeObjIndex = getIndexIfStoreObjWithNameAlreadyExists(storeName, storeList);
                     if (storeObjIndex != -1) {
                         Store storeObj = storeList.get(storeObjIndex);
                         item.setItemStoreId(storeObj.getStoreId());
@@ -198,7 +184,32 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
                     createNewStore(storeName, item);
                 }
             }
-            saveStoreListChanges();
+            saveStoreListChangesInDb();
+        }
+    }
+
+    private void updateItemInStoreList(Item item, String operation) {
+        if (item != null) {
+            String storeId = item.getItemStoreId();
+            if (!TextUtils.isEmpty(storeId)) {
+                int storeObjIndex = getIndexIfStoreObjWithIdAlreadyExists(storeId, storeList);
+                if (storeObjIndex != -1) {
+                    Store storeObj = storeList.get(storeObjIndex);
+                    List<Item> itemList = storeObj.getItems();
+                    int itemObjIndex = getIndexIfItemObjAlreadyExists(item.getItemId(), itemList);
+                    if (itemObjIndex != -1) {
+                        if (operation.equals(EDIT_ITEM_OP))
+                            itemList.set(itemObjIndex, item);
+                        else {
+                            // Delete item
+                            itemList.remove(itemObjIndex);
+                            // If itemList gets empty, remove store from the storelist
+                            if (itemList.isEmpty())
+                                storeList.remove(storeObjIndex);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -211,17 +222,17 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         storeList.add(storeObj);
     }
 
-    private int getIndexIfItemObjAlreadyExists(int itemId, List<Item> itemList) {
+    private int getIndexIfItemObjAlreadyExists(String itemId, List<Item> itemList) {
         for (int i = 0; i < itemList.size(); i++) {
             Item item = itemList.get(i);
-            int id = item.getItemId();
-            if (id == itemId)
+            String id = item.getItemId();
+            if (!TextUtils.isEmpty(id) && id.equalsIgnoreCase(itemId))
                 return i;
         }
         return -1;
     }
 
-    private int getIndexIfStoreObjAlreadyExists(String storeName, List<Store> storeList) {
+    private int getIndexIfStoreObjWithNameAlreadyExists(String storeName, List<Store> storeList) {
         for (int i = 0; i < storeList.size(); i++) {
             Store store = storeList.get(i);
             String name = store.getStoreName();
@@ -231,25 +242,26 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         return -1;
     }
 
-    private int getIndexIfStoreObjAlreadyExists(int storeId, List<Store> storeList) {
+    private int getIndexIfStoreObjWithIdAlreadyExists(String storeId, List<Store> storeList) {
         for (int i = 0; i < storeList.size(); i++) {
             Store store = storeList.get(i);
-            int id = store.getStoreId();
-            if (id == storeId)
+            String id = store.getStoreId();
+            if (!TextUtils.isEmpty(id) && id.equalsIgnoreCase(storeId))
                 return i;
         }
         return -1;
     }
 
-    private void saveStoreListChanges() {
+    private void saveStoreListChangesInDb() {
         if (currentUser != null) {
-            String userId = currentUser.getUid();
-            firebaseDb.collection(userId).document(shoppingListName)
+            final String userId = currentUser.getUid();
+            firebaseDb.collection(userId)
+                    .document(shoppingListName)
                     .update("stores", storeList)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            Toast.makeText(getApplicationContext(), "List has been stored successfully",
+                            Toast.makeText(getApplicationContext(), "List has updated successfully",
                                     Toast.LENGTH_SHORT).show();
                             itemListViewModel.setList(storeList);
                         }
@@ -257,17 +269,22 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            showErrorAlertDialog(R.string.failure_err_title, R.string.failure_err_msg);
+                            showErrorAlertDialog();
                         }
                     });
         }
     }
 
-    private void showErrorAlertDialog(int errTitleId, int errMsgId) {
+    private void showErrorAlertDialog() {
         android.app.AlertDialog.Builder alertDialog = new android.app.AlertDialog.Builder(this);
-        alertDialog.setTitle(errTitleId);
-        alertDialog.setMessage(errMsgId);
+        alertDialog.setTitle(R.string.failure_err_title);
+        alertDialog.setMessage(R.string.failure_err_msg);
         alertDialog.setNegativeButton(R.string.alert_dialog_ok_text, null);
         alertDialog.show();
+    }
+
+    private void deleteItem(Item item) {
+        updateItemInStoreList(item, DELETE_ITEM_OP);
+        saveStoreListChangesInDb();
     }
 }

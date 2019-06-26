@@ -39,7 +39,7 @@
     <string name="invalid_item_name_err_msg">Please enter a valid and unique Item name !</string>
     <string name="invalid_item_qty_err_msg">Please enter a valid item quantity value !</string>
     <string name="invalid_item_msrmnt_err_msg">Please enter a valid quantity measurement value !</string>
-    <string name="invalid_store_name_err_msg">Please enter a valid and unique Store name !</string>
+    <string name="invalid_store_name_err_msg">Please enter a valid Store name !</string>
 
     <string-array name="list_types_array">
         <item>Grocery</item>

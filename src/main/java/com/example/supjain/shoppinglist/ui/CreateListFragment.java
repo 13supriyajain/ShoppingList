@@ -126,4 +126,8 @@ public class CreateListFragment extends Fragment implements AdapterView.OnItemSe
     public interface CreateListReqHandler {
         void onCreateListBtnClick(String listName, String listType);
     }
+
+    public boolean isDataChanged() {
+        return this.dataChanged;
+    }
 }

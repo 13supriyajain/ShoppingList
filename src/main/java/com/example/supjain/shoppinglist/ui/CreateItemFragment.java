@@ -142,7 +142,7 @@ public class CreateItemFragment extends Fragment implements View.OnClickListener
             if (storeNameEditText != null) {
                 storeName = storeNameEditText.getText().toString();
                 if (isInvalidStoreNameValue(storeName)) {
-                    showErrorAlertDialog(R.string.invalid_item_msrmnt_err_msg);
+                    showErrorAlertDialog(R.string.invalid_store_name_err_msg);
                     return;
                 }
             }
@@ -192,12 +192,11 @@ public class CreateItemFragment extends Fragment implements View.OnClickListener
         super.onSaveInstanceState(outState);
     }
 
-//    @Override
-//    public boolean onBackPressed() {
-//        return dataChanged;
-//    }
-
     public interface SaveItemReqHandler {
         void onSaveItemBtnClick(Item item, String storeName);
+    }
+
+    public boolean isDataChanged() {
+        return this.dataChanged;
     }
 }
