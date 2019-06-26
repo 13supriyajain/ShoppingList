@@ -46,8 +46,7 @@ public class CreateListActivity extends AppCompatActivity implements CreateListF
     @Override
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(CREATE_LIST_FRAGMENT_TAG);
-        if (fragment != null && fragment instanceof CreateListFragment
-                && ((CreateListFragment) fragment).isDataChanged())
+        if (fragment instanceof CreateListFragment && ((CreateListFragment) fragment).isDataChanged())
             showDiscardChangesAlertDialog();
         else
             super.onBackPressed();
@@ -57,8 +56,7 @@ public class CreateListActivity extends AppCompatActivity implements CreateListF
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             Fragment fragment = getSupportFragmentManager().findFragmentByTag(CREATE_LIST_FRAGMENT_TAG);
-            if (fragment != null && fragment instanceof CreateListFragment
-                    && ((CreateListFragment) fragment).isDataChanged()) {
+            if (fragment instanceof CreateListFragment && ((CreateListFragment) fragment).isDataChanged()) {
                 showDiscardChangesAlertDialog();
                 return true;
             }

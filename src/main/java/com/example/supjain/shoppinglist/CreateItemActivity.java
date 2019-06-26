@@ -46,8 +46,7 @@ public class CreateItemActivity extends AppCompatActivity implements CreateItemF
     @Override
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(CREATE_ITEM_FRAGMENT_TAG);
-        if (fragment != null && fragment instanceof CreateItemFragment
-                && ((CreateItemFragment) fragment).isDataChanged())
+        if (fragment instanceof CreateItemFragment && ((CreateItemFragment) fragment).isDataChanged())
             showDiscardChangesAlertDialog();
         else
             super.onBackPressed();
@@ -57,10 +56,10 @@ public class CreateItemActivity extends AppCompatActivity implements CreateItemF
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             Fragment fragment = getSupportFragmentManager().findFragmentByTag(CREATE_ITEM_FRAGMENT_TAG);
-            if (fragment != null && fragment instanceof CreateItemFragment
-                    && ((CreateItemFragment) fragment).isDataChanged())
+            if (fragment instanceof CreateItemFragment && ((CreateItemFragment) fragment).isDataChanged()) {
                 showDiscardChangesAlertDialog();
-            return true;
+                return true;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
