@@ -19,8 +19,6 @@ import com.example.supjain.shoppinglist.util.ShoppingListUtil;
 import com.example.supjain.shoppinglist.viewmodel.ShoppingListsViewModel;
 import com.example.supjain.shoppinglist.widget.ShoppingListWidgetProvider;
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.ErrorCodes;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -169,30 +167,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 currentUser = firebaseAuth.getCurrentUser();
                 Toast.makeText(getApplicationContext(), "Signin successful", Toast.LENGTH_SHORT).show();
                 fetchAndSetShoppingLists();
             } else {
-                // Sign in failed
-                if (response == null) {
-                    // User pressed back button
-                    Toast.makeText(getApplicationContext(), "Sign-in cancelled", Toast.LENGTH_SHORT)
-                            .show();
-                }
-
-                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
-                    Toast.makeText(getApplicationContext(), "No network", Toast.LENGTH_SHORT)
-                            .show();
-                }
-
-                // Other error
-                Toast.makeText(getApplicationContext(), "Sign-in error", Toast.LENGTH_SHORT)
-                        .show();
-
                 finish();
             }
         } else if (requestCode == RC_CREATE_LIST && resultCode == RESULT_OK && data != null) {
@@ -301,7 +281,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (id) {
             case R.id.signout_menu_option:
                 signOut();
-                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
