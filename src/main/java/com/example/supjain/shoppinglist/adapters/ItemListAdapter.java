@@ -1,6 +1,7 @@
 package com.example.supjain.shoppinglist.adapters;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -140,10 +141,13 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ItemLi
                     clickHandler.mClick(DELETE_ITEM_OP, (Item) displayIndexMap.get(clickIndex));
                     break;
                 case R.id.item_name_checkbox:
-                    if (itemNameCheckbox.isChecked())
+                    if (itemNameCheckbox.isChecked()) {
+                        itemNameCheckbox.setPaintFlags(itemNameCheckbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                         clickHandler.mClick(CHECK_ITEM_OP, (Item) displayIndexMap.get(clickIndex));
-                    else
+                    } else {
+                        itemNameCheckbox.setPaintFlags(itemNameCheckbox.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                         clickHandler.mClick(UNCHECK_ITEM_OP, (Item) displayIndexMap.get(clickIndex));
+                    }
                     break;
             }
         }
@@ -156,6 +160,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ItemLi
 
         void displayItem(Item item) {
             itemNameCheckbox.setText(item.toString());
+            if (item.getItemMarkedPurchased() == 1) {
+                itemNameCheckbox.setPaintFlags(itemNameCheckbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                itemNameCheckbox.setChecked(true);
+            }
             storeNameTextView.setVisibility(View.GONE);
             itemEntryContainer.setVisibility(View.VISIBLE);
         }

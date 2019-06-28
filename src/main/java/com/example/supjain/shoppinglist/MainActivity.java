@@ -117,8 +117,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         binding.setVariable(BR.viewModel, shoppingListsViewModel);
-
-        fetchAndSetShoppingLists();
         binding.executePendingBindings();
     }
 
@@ -320,5 +318,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             intent.putExtra(SHOPPING_LIST_NAME_KEY, list.getShoppingListName());
             startActivity(intent);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchAndSetShoppingLists();
     }
 }

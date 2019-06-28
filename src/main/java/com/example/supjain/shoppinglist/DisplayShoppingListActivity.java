@@ -2,11 +2,9 @@ package com.example.supjain.shoppinglist;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,7 +13,6 @@ import com.example.supjain.shoppinglist.data.Item;
 import com.example.supjain.shoppinglist.data.Store;
 import com.example.supjain.shoppinglist.viewmodel.ItemListViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -49,7 +46,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         ItemListAdapter.ItemListAdapterOnClickHandler {
 
     private ItemListViewModel itemListViewModel;
-    private List<Store> storeList;
+    private ArrayList<Store> storeList;
     private ItemListAdapter itemListAdapter;
     private FirebaseFirestore firebaseDb;
     private FirebaseUser currentUser;
@@ -58,6 +55,9 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null)
+            storeList = savedInstanceState.getParcelableArrayList(STORE_LIST_OBJ_KEY);
 
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         firebaseDb = FirebaseFirestore.getInstance();
@@ -89,7 +89,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
             public void onChanged(List<Store> list) {
                 if (list != null && !list.isEmpty() && itemListAdapter != null) {
                     itemListAdapter.setStoresList(list);
-                    errMsgTextView.setVisibility(View.GONE);
+                    itemListViewModel.setErrorMsg(null);
                 } else
                     itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
             }
@@ -97,13 +97,19 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         itemListViewModel.getErrorMsg().observe(this, new Observer<String>() {
             @Override
             public void onChanged(String errMsg) {
-                errMsgTextView.setText(errMsg);
-                errMsgTextView.setVisibility(View.VISIBLE);
-                itemListAdapter.setStoresList(null);
+                if (TextUtils.isEmpty(errMsg))
+                    errMsgTextView.setVisibility(View.GONE);
+                else {
+                    errMsgTextView.setText(errMsg);
+                    errMsgTextView.setVisibility(View.VISIBLE);
+                    itemListAdapter.setStoresList(null);
+                }
             }
         });
 
-        storeList = intent.getParcelableArrayListExtra(STORE_LIST_OBJ_KEY);
+        if (storeList == null && intent.hasExtra(STORE_LIST_OBJ_KEY))
+            storeList = intent.getParcelableArrayListExtra(STORE_LIST_OBJ_KEY);
+
         if (storeList == null || storeList.isEmpty())
             itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
         else
@@ -125,9 +131,6 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
 
     @Override
     public void mClick(String operation, final Item item) {
-        Toast.makeText(this, operation + " on " + item.getItemName() + " clicked",
-                Toast.LENGTH_SHORT).show();
-        CheckBox checkBox;
         switch (operation) {
             case EDIT_ITEM_OP:
                 Intent intent = new Intent(this, CreateItemActivity.class);
@@ -143,19 +146,18 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 deleteItem(item);
-                                Toast.makeText(getBaseContext(), "Item deleted", Toast.LENGTH_SHORT).show();
                             }
                         });
                 dialog.setNegativeButton(getString(R.string.alert_dialog_cancel_text), null);
                 dialog.show();
                 break;
             case CHECK_ITEM_OP:
-                checkBox = findViewById(R.id.item_name_checkbox);
-                checkBox.setPaintFlags(checkBox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                item.setItemMarkedPurchased(1);
+                updateItemInStoreList(item, EDIT_ITEM_OP);
                 break;
             case UNCHECK_ITEM_OP:
-                checkBox = findViewById(R.id.item_name_checkbox);
-                checkBox.setPaintFlags(checkBox.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                item.setItemMarkedPurchased(0);
+                updateItemInStoreList(item, EDIT_ITEM_OP);
                 break;
         }
     }
@@ -184,7 +186,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
                     createNewStore(storeName, item);
                 }
             }
-            saveStoreListChangesInDb();
+            itemListViewModel.setList(storeList);
         }
     }
 
@@ -258,33 +260,30 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
             firebaseDb.collection(userId)
                     .document(shoppingListName)
                     .update("stores", storeList)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(getApplicationContext(), "List has updated successfully",
-                                    Toast.LENGTH_SHORT).show();
-                            itemListViewModel.setList(storeList);
-                        }
-                    })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            showErrorAlertDialog();
+                            Toast.makeText(getApplicationContext(), "Error occurred while storing " +
+                                    "shopping list updates", Toast.LENGTH_SHORT).show();
                         }
                     });
         }
     }
 
-    private void showErrorAlertDialog() {
-        android.app.AlertDialog.Builder alertDialog = new android.app.AlertDialog.Builder(this);
-        alertDialog.setTitle(R.string.failure_err_title);
-        alertDialog.setMessage(R.string.failure_err_msg);
-        alertDialog.setNegativeButton(R.string.alert_dialog_ok_text, null);
-        alertDialog.show();
-    }
-
     private void deleteItem(Item item) {
         updateItemInStoreList(item, DELETE_ITEM_OP);
+        itemListViewModel.setList(storeList);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(STORE_LIST_OBJ_KEY, storeList);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         saveStoreListChangesInDb();
     }
 }
