@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -101,8 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onChanged(List<ShoppingList> list) {
                 if (list != null && !list.isEmpty() && shoppingListsAdapter != null) {
                     shoppingListsAdapter.setShoppingLists(list);
-                    errMsgTextView.setVisibility(View.GONE);
-                    progressBar.setVisibility(View.GONE);
+                    shoppingListsViewModel.setErrorMsg(null);
                 } else
                     shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_shopping_list_err_msg));
             }
@@ -110,10 +110,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         shoppingListsViewModel.getErrorMsg().observe(this, new Observer<String>() {
             @Override
             public void onChanged(String errMsg) {
-                errMsgTextView.setText(errMsg);
-                errMsgTextView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-                shoppingListsAdapter.setShoppingLists(null);
+                if (TextUtils.isEmpty(errMsg)) {
+                    errMsgTextView.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
+                } else {
+                    errMsgTextView.setText(errMsg);
+                    errMsgTextView.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                    shoppingListsAdapter.setShoppingLists(null);
+                }
             }
         });
         binding.setVariable(BR.viewModel, shoppingListsViewModel);
@@ -121,10 +126,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void fetchAndSetShoppingLists() {
-        if (!ShoppingListUtil.hasNetworkConnection(this)) {
+        if (!ShoppingListUtil.hasNetworkConnection(this))
             shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_connection_err_msg));
-            shoppingListsViewModel.setList(null);
-        } else {
+        else {
             final List<ShoppingList> lists = new ArrayList<>();
             if (currentUser != null) {
                 String userId = currentUser.getUid();
@@ -168,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 currentUser = firebaseAuth.getCurrentUser();
-                Toast.makeText(getApplicationContext(), "Signin successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.signin_success_text_msg, Toast.LENGTH_SHORT).show();
                 fetchAndSetShoppingLists();
             } else {
                 finish();
@@ -225,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(getApplicationContext(), "List has been stored successfully",
+                        Toast.makeText(getApplicationContext(), R.string.list_store_success_msg,
                                 Toast.LENGTH_SHORT).show();
                         fetchAndSetShoppingLists();
                     }
@@ -251,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .signOut(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(getApplicationContext(), "Signed out",
+                        Toast.makeText(getApplicationContext(), R.string.signout_success_text_msg,
                                 Toast.LENGTH_SHORT).show();
                         signIn();
                     }
@@ -297,12 +301,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void mRecyclerViewClick(ShoppingList list) {
-
         // Update all widgets
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,
-                ShoppingListWidgetProvider.class));
-        ShoppingListWidgetProvider.updateAppWidgets(this, appWidgetManager, list, appWidgetIds);
+        updateWidgets(list);
 
         if (widgetConfigCall) {
             // Finish configuring widget
@@ -311,8 +311,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             setResult(RESULT_OK, resultValue);
             finish();
         } else {
-            Toast.makeText(this, "List selected: " + list.getShoppingListName(),
-                    Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, DisplayShoppingListActivity.class);
             intent.putParcelableArrayListExtra(STORE_LIST_OBJ_KEY, (ArrayList<Store>) list.getStores());
             intent.putExtra(SHOPPING_LIST_NAME_KEY, list.getShoppingListName());
@@ -324,5 +322,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         fetchAndSetShoppingLists();
+    }
+
+    private void updateWidgets(ShoppingList list) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,
+                ShoppingListWidgetProvider.class));
+        ShoppingListWidgetProvider.updateAppWidgets(this, appWidgetManager, list, appWidgetIds);
     }
 }

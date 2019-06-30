@@ -263,8 +263,8 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getApplicationContext(), "Error occurred while storing " +
-                                    "shopping list updates", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), R.string.Update_list_error_msg,
+                                    Toast.LENGTH_SHORT).show();
                         }
                     });
         }

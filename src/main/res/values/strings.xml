@@ -40,6 +40,13 @@
     <string name="invalid_item_qty_err_msg">Please enter a valid item quantity value !</string>
     <string name="invalid_item_msrmnt_err_msg">Please enter a valid quantity measurement value !</string>
     <string name="invalid_store_name_err_msg">Please enter a valid Store name !</string>
+    <string name="edit_icon_content_desc">Edit item</string>
+    <string name="delete_icon_content_desc">Delete item</string>
+    <string name="list_type_spinner_content_desc">Select a list type</string>
+    <string name="signin_success_text_msg">Welcome !</string>
+    <string name="list_store_success_msg">List has been stored successfully</string>
+    <string name="signout_success_text_msg">Signed out successfully !</string>
+    <string name="Update_list_error_msg">Error occurred while saving shopping list updates !</string>
 
     <string-array name="list_types_array">
         <item>Grocery</item>

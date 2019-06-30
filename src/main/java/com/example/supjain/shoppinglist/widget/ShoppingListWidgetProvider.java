@@ -67,7 +67,8 @@ public class ShoppingListWidgetProvider extends AppWidgetProvider {
                     List<Item> itemList = store.getItems();
                     if (itemList != null && !itemList.isEmpty()) {
                         for (Item item : itemList) {
-                            shoppingListData.append(item.toString()).append("\n");
+                            if (item.getItemMarkedPurchased() == 0)
+                                shoppingListData.append(item.toString()).append("\n");
                         }
                     }
                     shoppingListData.append("------------\n");
