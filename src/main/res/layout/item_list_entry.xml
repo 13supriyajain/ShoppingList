@@ -24,6 +24,7 @@
             android:id="@+id/item_name_checkbox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:focusable="true"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:textAppearance="?android:textAppearanceLarge"
@@ -33,18 +34,22 @@
             android:id="@+id/item_edit_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/edit_icon_content_desc"
             android:layout_gravity="center"
             android:layout_marginLeft="@dimen/margin_small"
             android:layout_marginRight="@dimen/margin_small"
             android:background="@android:color/transparent"
+            android:focusable="true"
             android:src="@drawable/ic_edit" />
 
         <ImageButton
             android:id="@+id/item_delete_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/delete_icon_content_desc"
             android:layout_gravity="center"
             android:background="@android:color/transparent"
+            android:focusable="true"
             android:src="@drawable/ic_delete" />
 
     </LinearLayout>

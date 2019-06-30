@@ -31,6 +31,7 @@
             android:id="@+id/item_list_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:focusable="true"
             android:visibility="@{(viewModel.list != null || !viewModel.list.isEmpty()) ? View.VISIBLE : View.GONE}"
             app:listdata="@{viewModel.list}" />
 
@@ -42,6 +43,8 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
             android:layout_margin="@dimen/margin_medium"
+            android:contentDescription="@string/create_item_activity_title"
+            android:focusable="true"
             android:src="@drawable/create_item_fab_icon" />
 
     </RelativeLayout>

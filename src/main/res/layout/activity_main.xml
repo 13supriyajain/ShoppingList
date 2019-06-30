@@ -33,13 +33,13 @@
             android:id="@+id/progressbar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="@{(viewModel.list == null || viewModel.list.isEmpty() &amp;&amp; viewModel.errorMsg == null) ? View.VISIBLE : View.GONE}" />
+            android:layout_centerInParent="true" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/shoppinglists_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:focusable="true"
             android:visibility="@{(viewModel.list != null || !viewModel.list.isEmpty()) ? View.VISIBLE : View.GONE}"
             app:listdata="@{viewModel.list}" />
 
@@ -50,7 +50,9 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
+            android:contentDescription="@string/create_list_activity_title"
             android:layout_margin="@dimen/margin_medium"
+            android:focusable="true"
             android:src="@drawable/create_list_fab_icon" />
 
     </RelativeLayout>
