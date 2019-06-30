@@ -1,6 +1,5 @@
 package com.example.supjain.shoppinglist;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -12,8 +11,6 @@ import com.example.supjain.shoppinglist.adapters.ItemListAdapter;
 import com.example.supjain.shoppinglist.data.Item;
 import com.example.supjain.shoppinglist.data.Store;
 import com.example.supjain.shoppinglist.viewmodel.ItemListViewModel;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -21,15 +18,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static com.example.supjain.shoppinglist.util.Constants.CHECK_ITEM_OP;
 import static com.example.supjain.shoppinglist.util.Constants.DELETE_ITEM_OP;
@@ -42,8 +40,13 @@ import static com.example.supjain.shoppinglist.util.Constants.STORE_LIST_OBJ_KEY
 import static com.example.supjain.shoppinglist.util.Constants.STORE_NAME_KEY;
 import static com.example.supjain.shoppinglist.util.Constants.UNCHECK_ITEM_OP;
 
-public class DisplayShoppingListActivity extends AppCompatActivity implements View.OnClickListener,
+public class DisplayShoppingListActivity extends AppCompatActivity implements
         ItemListAdapter.ItemListAdapterOnClickHandler {
+
+    @BindView(R.id.item_list_network_err_msg)
+    TextView errMsgTextView;
+    @BindView(R.id.item_list_recyclerview)
+    RecyclerView recyclerView;
 
     private ItemListViewModel itemListViewModel;
     private ArrayList<Store> storeList;
@@ -70,40 +73,22 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
         shoppingListName = intent.getStringExtra(SHOPPING_LIST_NAME_KEY);
         setTitle(shoppingListName);
 
-        FloatingActionButton addItemFab = findViewById(R.id.add_item_fab);
-        addItemFab.setOnClickListener(this);
-
-        final TextView errMsgTextView = findViewById(R.id.item_list_network_err_msg);
-
-        RecyclerView recyclerView = findViewById(R.id.item_list_recyclerview);
-        itemListAdapter = new ItemListAdapter(this);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(itemListAdapter);
-        recyclerView.setHasFixedSize(true);
-
         itemListViewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
         binding.setVariable(BR.viewModel, itemListViewModel);
-        itemListViewModel.getList().observe(this, new Observer<List<Store>>() {
-            @Override
-            public void onChanged(List<Store> list) {
-                if (list != null && !list.isEmpty() && itemListAdapter != null) {
-                    itemListAdapter.setStoresList(list);
-                    itemListViewModel.setErrorMsg(null);
-                } else
-                    itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
-            }
+        itemListViewModel.getList().observe(this, list -> {
+            if (list != null && !list.isEmpty() && itemListAdapter != null) {
+                itemListAdapter.setStoresList(list);
+                itemListViewModel.setErrorMsg(null);
+            } else
+                itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
         });
-        itemListViewModel.getErrorMsg().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(String errMsg) {
-                if (TextUtils.isEmpty(errMsg))
-                    errMsgTextView.setVisibility(View.GONE);
-                else {
-                    errMsgTextView.setText(errMsg);
-                    errMsgTextView.setVisibility(View.VISIBLE);
-                    itemListAdapter.setStoresList(null);
-                }
+        itemListViewModel.getErrorMsg().observe(this, errMsg -> {
+            if (TextUtils.isEmpty(errMsg))
+                errMsgTextView.setVisibility(View.GONE);
+            else {
+                errMsgTextView.setText(errMsg);
+                errMsgTextView.setVisibility(View.VISIBLE);
+                itemListAdapter.setStoresList(null);
             }
         });
 
@@ -116,17 +101,19 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
             itemListViewModel.setList(storeList);
 
         binding.executePendingBindings();
+        ButterKnife.bind(this);
+
+        itemListAdapter = new ItemListAdapter(this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(itemListAdapter);
+        recyclerView.setHasFixedSize(true);
     }
 
-    @Override
-    public void onClick(View view) {
-        int id = view.getId();
-        switch (id) {
-            case R.id.add_item_fab:
-                Intent intent = new Intent(this, CreateItemActivity.class);
-                startActivityForResult(intent, RC_CREATE_ITEM);
-                break;
-        }
+    @OnClick(R.id.add_item_fab)
+    public void onFabClick() {
+        Intent intent = new Intent(this, CreateItemActivity.class);
+        startActivityForResult(intent, RC_CREATE_ITEM);
     }
 
     @Override
@@ -140,13 +127,9 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
             case DELETE_ITEM_OP:
                 AlertDialog.Builder dialog = new AlertDialog.Builder(this);
                 dialog.setTitle(getString(R.string.delete_item_alert_msg));
-                dialog.setPositiveButton(getString(R.string.delete_item_alert_confirm_text),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                deleteItem(item);
-                            }
+                dialog.setPositiveButton(getString(R.string.delete_item_alert_confirm_text), (dialog1, which) -> {
+                    dialog1.dismiss();
+                    deleteItem(item);
                         });
                 dialog.setNegativeButton(getString(R.string.alert_dialog_cancel_text), null);
                 dialog.show();
@@ -260,13 +243,8 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements Vi
             firebaseDb.collection(userId)
                     .document(shoppingListName)
                     .update("stores", storeList)
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getApplicationContext(), R.string.Update_list_error_msg,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    .addOnFailureListener(e -> Toast.makeText(getApplicationContext(),
+                            R.string.Update_list_error_msg, Toast.LENGTH_SHORT).show());
         }
     }
 

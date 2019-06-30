@@ -3,40 +3,45 @@ package com.example.supjain.shoppinglist.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.supjain.shoppinglist.R;
 import com.example.supjain.shoppinglist.data.Item;
 
+import java.util.Objects;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnTextChanged;
 
 import static com.example.supjain.shoppinglist.util.Constants.ITEM_NAME_MAX_LENGTH;
 import static com.example.supjain.shoppinglist.util.Constants.ITEM_TO_EDIT;
 import static com.example.supjain.shoppinglist.util.Constants.MEASUREMENT_VALUE_MAX_LENGTH;
 import static com.example.supjain.shoppinglist.util.Constants.STORE_NAME_MAX_LENGTH;
 
-public class CreateItemFragment extends Fragment implements View.OnClickListener, TextWatcher {
-    //CreateItemActivity.IOnBackPressed {
+public class CreateItemFragment extends Fragment {
+
+    @BindView(R.id.item_name_edittext)
+    EditText itemNameEditText;
+    @BindView(R.id.item_quantity_edittext)
+    EditText itemQuantityEditText;
+    @BindView(R.id.item_measure_edittext)
+    EditText itemMeasureEditText;
+    @BindView(R.id.store_name_edittext)
+    EditText storeNameEditText;
 
     private static final String DATA_CHANGED_FLAG = "DataChangedFlag";
     private boolean dataChanged;
     private boolean editItemMode;
     private Item item;
-
-    private EditText itemNameEditText;
-    private EditText itemQuantityEditText;
-    private EditText itemMeasureEditText;
-    private EditText storeNameEditText;
-
     private SaveItemReqHandler saveItemReqHandler;
 
     @Override
@@ -60,46 +65,29 @@ public class CreateItemFragment extends Fragment implements View.OnClickListener
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.create_item_fragment, container, false);
-
-        itemNameEditText = rootView.findViewById(R.id.item_name_edittext);
-        itemQuantityEditText = rootView.findViewById(R.id.item_quantity_edittext);
-        itemMeasureEditText = rootView.findViewById(R.id.item_measure_edittext);
-        storeNameEditText = rootView.findViewById(R.id.store_name_edittext);
-        itemNameEditText.addTextChangedListener(this);
-        itemQuantityEditText.addTextChangedListener(this);
-        itemMeasureEditText.addTextChangedListener(this);
-        storeNameEditText.addTextChangedListener(this);
+        ButterKnife.bind(this, rootView);
 
         if (item != null) {
             editItemMode = true;
             itemNameEditText.setText(item.getItemName());
-            itemQuantityEditText.setText("" + item.getItemQuantity());
+            itemQuantityEditText.setText(String.valueOf(item.getItemQuantity()));
             itemMeasureEditText.setText(item.getItemMeasurement());
             rootView.findViewById(R.id.store_name_container).setVisibility(View.GONE);
         } else
             editItemMode = false;
 
-        Button saveItemBtn = rootView.findViewById(R.id.save_item_btn);
-        saveItemBtn.setOnClickListener(this);
-
         return rootView;
     }
 
-    @Override
-    public void onClick(View view) {
-        int id = view.getId();
-        switch (id) {
-            case R.id.save_item_btn:
-                if (dataChanged) {
-                    retrieveAndSaveValues();
-                } else
-                    getActivity().finish();
-                break;
-        }
+    @OnClick(R.id.save_item_btn)
+    void onSaveBtnClick() {
+        if (dataChanged) {
+            retrieveAndSaveValues();
+        } else
+            Objects.requireNonNull(getActivity()).finish();
     }
 
     private void retrieveAndSaveValues() {
-
         String itemName = "";
         if (itemNameEditText != null) {
             itemName = itemNameEditText.getText().toString();
@@ -171,18 +159,9 @@ public class CreateItemFragment extends Fragment implements View.OnClickListener
         alertDialog.show();
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
+    @OnTextChanged({R.id.item_name_edittext, R.id.item_quantity_edittext, R.id.item_measure_edittext,
+            R.id.store_name_edittext})
+    void onEditTextChanged() {
         dataChanged = true;
     }
 

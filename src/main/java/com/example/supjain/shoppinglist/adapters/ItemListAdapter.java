@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -20,6 +19,9 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static com.example.supjain.shoppinglist.util.Constants.CHECK_ITEM_OP;
 import static com.example.supjain.shoppinglist.util.Constants.DELETE_ITEM_OP;
@@ -72,7 +74,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ItemLi
     }
 
     /**
-     * Returns an index map to help decide whether to store name or item entry for the recyclerview's
+     * Returns an index map to help decide whether to show store-name or item entry for the recyclerview's
      * current position.
      **/
     private HashMap<Integer, Object> calculateDisplayIndices() {
@@ -106,29 +108,21 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ItemLi
         void mClick(String operation, Item item);
     }
 
-    public class ItemListAdapterViewHolder extends RecyclerView.ViewHolder
-            implements View.OnClickListener {
+    public class ItemListAdapterViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.store_name_textview)
         TextView storeNameTextView;
+        @BindView(R.id.item_entry_container)
         LinearLayout itemEntryContainer;
+        @BindView(R.id.item_name_checkbox)
         CheckBox itemNameCheckbox;
-        ImageButton itemEditBtn;
-        ImageButton itemDeleteBtn;
 
         ItemListAdapterViewHolder(View view) {
             super(view);
-            storeNameTextView = view.findViewById(R.id.store_name_textview);
-            itemEntryContainer = view.findViewById(R.id.item_entry_container);
-            itemNameCheckbox = view.findViewById(R.id.item_name_checkbox);
-            itemEditBtn = view.findViewById(R.id.item_edit_btn);
-            itemDeleteBtn = view.findViewById(R.id.item_delete_btn);
-
-            itemNameCheckbox.setOnClickListener(this);
-            itemEditBtn.setOnClickListener(this);
-            itemDeleteBtn.setOnClickListener(this);
+            ButterKnife.bind(this, view);
         }
 
-        @Override
+        @OnClick({R.id.item_name_checkbox, R.id.item_edit_btn, R.id.item_delete_btn})
         public void onClick(View view) {
             int id = view.getId();
             int clickIndex = getAdapterPosition();

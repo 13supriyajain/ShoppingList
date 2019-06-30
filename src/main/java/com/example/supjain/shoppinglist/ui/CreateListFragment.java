@@ -3,32 +3,38 @@ package com.example.supjain.shoppinglist.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.supjain.shoppinglist.R;
 
+import java.util.Objects;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnItemSelected;
+import butterknife.OnTextChanged;
 
 import static com.example.supjain.shoppinglist.util.Constants.LIST_NAME_MAX_LENGTH;
 
-public class CreateListFragment extends Fragment implements AdapterView.OnItemSelectedListener,
-        View.OnClickListener, TextWatcher {
+public class CreateListFragment extends Fragment {
+
+    @BindView(R.id.list_name_edittext)
+    EditText listnameEditText;
+    @BindView(R.id.list_type_spinner)
+    Spinner listTypesSpinner;
 
     private static final String DATA_CHANGED_FLAG = "DataChangedFlag";
     private boolean dataChanged;
     private ArrayAdapter<CharSequence> spinnerAdapter;
-    private EditText listnameEditText;
     private String listTypeSelected;
     private CreateListReqHandler createListReqHandler;
 
@@ -38,22 +44,15 @@ public class CreateListFragment extends Fragment implements AdapterView.OnItemSe
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.create_list_fragment, container, false);
+        ButterKnife.bind(this, rootView);
 
         if (savedInstanceState != null)
             dataChanged = savedInstanceState.getBoolean(DATA_CHANGED_FLAG);
 
-        Spinner listTypesSpinner = rootView.findViewById(R.id.list_type_spinner);
-        spinnerAdapter = ArrayAdapter.createFromResource(getContext(), R.array.list_types_array,
-                android.R.layout.simple_spinner_item);
+        spinnerAdapter = ArrayAdapter.createFromResource(Objects.requireNonNull(getContext()),
+                R.array.list_types_array, android.R.layout.simple_spinner_item);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         listTypesSpinner.setAdapter(spinnerAdapter);
-        listTypesSpinner.setOnItemSelectedListener(this);
-
-        listnameEditText = rootView.findViewById(R.id.list_name_edittext);
-        listnameEditText.addTextChangedListener(this);
-
-        Button createListBtn = rootView.findViewById(R.id.create_list_btn);
-        createListBtn.setOnClickListener(this);
 
         return rootView;
     }
@@ -64,30 +63,20 @@ public class CreateListFragment extends Fragment implements AdapterView.OnItemSe
         createListReqHandler = (CreateListReqHandler) getActivity();
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        listTypeSelected = spinnerAdapter.getItem(position).toString();
+    @OnItemSelected(R.id.list_type_spinner)
+    void onItemSelected(int position) {
+        listTypeSelected = Objects.requireNonNull(spinnerAdapter.getItem(position)).toString();
     }
 
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-    @Override
-    public void onClick(View view) {
-        int id = view.getId();
-        switch (id) {
-            case R.id.create_list_btn:
-                String listName = null;
-                if (listnameEditText != null)
-                    listName = listnameEditText.getText().toString();
-                if (!isInvalidListName(listName))
-                    createListReqHandler.onCreateListBtnClick(listName, listTypeSelected);
-                else
-                    showErrorAlertDialog();
-                break;
-        }
+    @OnClick(R.id.create_list_btn)
+    void onCreateListBtnClick() {
+        String listName = null;
+        if (listnameEditText != null)
+            listName = listnameEditText.getText().toString();
+        if (!isInvalidListName(listName))
+            createListReqHandler.onCreateListBtnClick(listName, listTypeSelected);
+        else
+            showErrorAlertDialog();
     }
 
     private boolean isInvalidListName(String listName) {
@@ -102,18 +91,8 @@ public class CreateListFragment extends Fragment implements AdapterView.OnItemSe
         alertDialog.show();
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
+    @OnTextChanged(R.id.list_name_edittext)
+    void onEditTextChanged() {
         dataChanged = true;
     }
 

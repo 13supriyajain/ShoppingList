@@ -20,29 +20,25 @@ import com.example.supjain.shoppinglist.util.ShoppingListUtil;
 import com.example.supjain.shoppinglist.viewmodel.ShoppingListsViewModel;
 import com.example.supjain.shoppinglist.widget.ShoppingListWidgetProvider;
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static com.example.supjain.shoppinglist.util.Constants.RC_CREATE_LIST;
 import static com.example.supjain.shoppinglist.util.Constants.RC_SIGN_IN;
@@ -50,8 +46,15 @@ import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_NAME
 import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_TYPE_KEY;
 import static com.example.supjain.shoppinglist.util.Constants.STORE_LIST_OBJ_KEY;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener,
+public class MainActivity extends AppCompatActivity implements
         ShoppingListsAdapter.ShoppingListsAdapterOnClickHandler {
+
+    @BindView(R.id.network_err_msg)
+    TextView errMsgTextView;
+    @BindView(R.id.progressbar)
+    ProgressBar progressBar;
+    @BindView(R.id.shoppinglists_recyclerview)
+    RecyclerView recyclerView;
 
     private static FirebaseAuth firebaseAuth;
     private FirebaseFirestore firebaseDb;
@@ -75,54 +78,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             widgetConfigCall = appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID;
         }
 
-        ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        binding.setLifecycleOwner(this);
-
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseDb = FirebaseFirestore.getInstance();
         checkIfUserIsSignedIn();
 
-        FloatingActionButton createListFab = findViewById(R.id.create_list_fab);
-        createListFab.setOnClickListener(this);
+        ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding.setLifecycleOwner(this);
 
-        final TextView errMsgTextView = findViewById(R.id.network_err_msg);
-        final ProgressBar progressBar = findViewById(R.id.progressbar);
+        shoppingListsViewModel = ViewModelProviders.of(this).get(ShoppingListsViewModel.class);
+        shoppingListsViewModel.getList().observe(this, list -> {
+            if (list != null && !list.isEmpty() && shoppingListsAdapter != null) {
+                shoppingListsAdapter.setShoppingLists(list);
+                shoppingListsViewModel.setErrorMsg(null);
+            } else
+                shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_shopping_list_err_msg));
+        });
+        shoppingListsViewModel.getErrorMsg().observe(this, errMsg -> {
+            if (TextUtils.isEmpty(errMsg)) {
+                errMsgTextView.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+            } else {
+                errMsgTextView.setText(errMsg);
+                errMsgTextView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                shoppingListsAdapter.setShoppingLists(null);
+            }
+        });
+        binding.setVariable(BR.viewModel, shoppingListsViewModel);
+        binding.executePendingBindings();
+        ButterKnife.bind(this);
 
-        RecyclerView recyclerView = findViewById(R.id.shoppinglists_recyclerview);
         shoppingListsAdapter = new ShoppingListsAdapter(this);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this,
                 ShoppingListUtil.calculateNoOfColumns(this));
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(shoppingListsAdapter);
         recyclerView.setHasFixedSize(true);
-
-        shoppingListsViewModel = ViewModelProviders.of(this).get(ShoppingListsViewModel.class);
-        shoppingListsViewModel.getList().observe(this, new Observer<List<ShoppingList>>() {
-            @Override
-            public void onChanged(List<ShoppingList> list) {
-                if (list != null && !list.isEmpty() && shoppingListsAdapter != null) {
-                    shoppingListsAdapter.setShoppingLists(list);
-                    shoppingListsViewModel.setErrorMsg(null);
-                } else
-                    shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_shopping_list_err_msg));
-            }
-        });
-        shoppingListsViewModel.getErrorMsg().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(String errMsg) {
-                if (TextUtils.isEmpty(errMsg)) {
-                    errMsgTextView.setVisibility(View.GONE);
-                    progressBar.setVisibility(View.GONE);
-                } else {
-                    errMsgTextView.setText(errMsg);
-                    errMsgTextView.setVisibility(View.VISIBLE);
-                    progressBar.setVisibility(View.GONE);
-                    shoppingListsAdapter.setShoppingLists(null);
-                }
-            }
-        });
-        binding.setVariable(BR.viewModel, shoppingListsViewModel);
-        binding.executePendingBindings();
     }
 
     private void fetchAndSetShoppingLists() {
@@ -134,25 +125,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String userId = currentUser.getUid();
                 firebaseDb.collection(userId)
                         .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        ShoppingList shoppingList = document.toObject(ShoppingList.class);
-                                        lists.add(shoppingList);
-                                    }
-                                    shoppingListsViewModel.setList(lists);
-                                } else
-                                    shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.failure_err_msg));
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                    ShoppingList shoppingList = document.toObject(ShoppingList.class);
+                                    lists.add(shoppingList);
+                                }
+                                shoppingListsViewModel.setList(lists);
+                            } else
                                 shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.failure_err_msg));
-                            }
-                        });
+                        })
+                        .addOnFailureListener(e -> shoppingListsViewModel.setErrorMsg(getResources()
+                                .getString(R.string.failure_err_msg)));
             }
         }
     }
@@ -200,46 +184,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         firebaseDb.collection(userId)
                 .document(newShoppingList.getShoppingListName())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document == null || !document.exists()) {
-                                storeShoppingList(userId, newShoppingList);
-                            } else {
-                                showErrorAlertDialog(R.string.list_name_exists_err_title,
-                                        R.string.list_name_exists_err_msg);
-                            }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document == null || !document.exists()) {
+                            storeShoppingList(userId, newShoppingList);
+                        } else {
+                            showErrorAlertDialog(R.string.list_name_exists_err_title,
+                                    R.string.list_name_exists_err_msg);
                         }
                     }
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        showErrorAlertDialog(R.string.failure_err_title, R.string.failure_err_msg);
-                    }
-                });
+                .addOnFailureListener(e -> showErrorAlertDialog(R.string.failure_err_title,
+                        R.string.failure_err_msg));
     }
 
     private void storeShoppingList(String userId, ShoppingList newShoppingList) {
         firebaseDb.collection(userId)
                 .document(newShoppingList.getShoppingListName())
                 .set(newShoppingList)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(getApplicationContext(), R.string.list_store_success_msg,
-                                Toast.LENGTH_SHORT).show();
-                        fetchAndSetShoppingLists();
-                    }
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getApplicationContext(), R.string.list_store_success_msg,
+                            Toast.LENGTH_SHORT).show();
+                    fetchAndSetShoppingLists();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        showErrorAlertDialog(R.string.failure_err_title, R.string.failure_err_msg);
-                    }
-                });
+                .addOnFailureListener(e -> showErrorAlertDialog(R.string.failure_err_title,
+                        R.string.failure_err_msg));
     }
 
     private void showErrorAlertDialog(int errTitleId, int errMsgId) {
@@ -253,12 +223,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void signOut() {
         AuthUI.getInstance()
                 .signOut(this)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(getApplicationContext(), R.string.signout_success_text_msg,
-                                Toast.LENGTH_SHORT).show();
-                        signIn();
-                    }
+                .addOnCompleteListener(task -> {
+                    Toast.makeText(getApplicationContext(), R.string.signout_success_text_msg,
+                            Toast.LENGTH_SHORT).show();
+                    signIn();
                 });
     }
 
@@ -289,14 +257,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    public void onClick(View view) {
-        int id = view.getId();
-        switch (id) {
-            case R.id.create_list_fab:
-                Intent intent = new Intent(this, CreateListActivity.class);
-                startActivityForResult(intent, RC_CREATE_LIST);
-        }
+    @OnClick(R.id.create_list_fab)
+    public void onFabClick() {
+        Intent intent = new Intent(this, CreateListActivity.class);
+        startActivityForResult(intent, RC_CREATE_LIST);
     }
 
     @Override
