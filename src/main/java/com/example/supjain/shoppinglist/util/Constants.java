@@ -4,7 +4,6 @@ public class Constants {
     public static final int RC_SIGN_IN = 123;
     public static final int RC_CREATE_LIST = 111;
     public static final int RC_CREATE_ITEM = 222;
-    public static final int RC_EDIT_LIST = 333;
 
     public static final int LIST_NAME_MAX_LENGTH = 30;
     public static final int ITEM_NAME_MAX_LENGTH = 50;

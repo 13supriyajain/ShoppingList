@@ -1,6 +1,5 @@
 package com.example.supjain.shoppinglist;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -20,7 +19,6 @@ import static com.example.supjain.shoppinglist.util.Constants.STORE_NAME_KEY;
 public class CreateItemActivity extends AppCompatActivity implements CreateItemFragment.SaveItemReqHandler {
 
     private static final String CREATE_ITEM_FRAGMENT_TAG = "CreateItemFragmentTag";
-    private CreateItemFragment createItemFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +27,7 @@ public class CreateItemActivity extends AppCompatActivity implements CreateItemF
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragmentManager.findFragmentByTag(CREATE_ITEM_FRAGMENT_TAG) == null) {
-            createItemFragment = new CreateItemFragment();
+            CreateItemFragment createItemFragment = new CreateItemFragment();
             Intent intent = getIntent();
             if (intent != null && intent.hasExtra(ITEM_TO_EDIT)) {
                 setTitle(R.string.edit_item_activity_title);
@@ -69,12 +67,9 @@ public class CreateItemActivity extends AppCompatActivity implements CreateItemF
         alertDialogBuilder.setTitle(getString(R.string.discard_changes_alert_dialog_title));
         alertDialogBuilder.setMessage(R.string.discard_changes_alert_dialog_msg);
         alertDialogBuilder.setPositiveButton(getString(R.string.discard_changes_alert_dialog_confirm_text),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        finish();
-                    }
+                (dialog, which) -> {
+                    dialog.dismiss();
+                    finish();
                 });
         alertDialogBuilder.setNegativeButton(getString(R.string.alert_dialog_cancel_text), null);
         alertDialogBuilder.show();

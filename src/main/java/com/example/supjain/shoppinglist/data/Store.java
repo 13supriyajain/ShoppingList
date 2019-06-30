@@ -20,7 +20,7 @@ public class Store implements Parcelable {
         }
     };
 
-    Random random = new Random();
+    private static final Random random = new Random();
     private String storeId;
     private String storeName;
     private List<Item> items;
@@ -34,7 +34,7 @@ public class Store implements Parcelable {
         this.items = items;
     }
 
-    protected Store(Parcel in) {
+    private Store(Parcel in) {
         storeId = in.readString();
         storeName = in.readString();
         items = in.createTypedArrayList(Item.CREATOR);

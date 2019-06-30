@@ -1,6 +1,5 @@
 package com.example.supjain.shoppinglist;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -68,13 +67,9 @@ public class CreateListActivity extends AppCompatActivity implements CreateListF
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(getString(R.string.discard_changes_alert_dialog_title));
         alertDialogBuilder.setMessage(R.string.discard_changes_alert_dialog_msg);
-        alertDialogBuilder.setPositiveButton(getString(R.string.discard_changes_alert_dialog_confirm_text),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        finish();
-                    }
+        alertDialogBuilder.setPositiveButton(getString(R.string.discard_changes_alert_dialog_confirm_text), (dialog, which) -> {
+            dialog.dismiss();
+            finish();
                 });
         alertDialogBuilder.setNegativeButton(getString(R.string.alert_dialog_cancel_text), null);
         alertDialogBuilder.show();

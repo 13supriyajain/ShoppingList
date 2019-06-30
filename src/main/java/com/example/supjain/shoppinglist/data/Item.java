@@ -19,7 +19,7 @@ public class Item implements Parcelable {
         }
     };
 
-    Random random = new Random();
+    private static final Random random = new Random();
     private String itemId;
     private String itemName;
     private float itemQuantity;
@@ -39,7 +39,7 @@ public class Item implements Parcelable {
         this.itemMarkedPurchased = 0; // Default value upon item creation
     }
 
-    protected Item(Parcel in) {
+    private Item(Parcel in) {
         itemId = in.readString();
         itemName = in.readString();
         itemQuantity = in.readFloat();
