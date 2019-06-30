@@ -15,10 +15,11 @@ public class Constants {
     public static final String CHECK_ITEM_OP = "CheckItem";
     public static final String UNCHECK_ITEM_OP = "UncheckItem";
 
-    public static final String STORE_LIST_OBJ_KEY = "StoreListObj";
+    public static final String SHOPPING_LIST_OBJ_KEY = "ShoppingListObj";
     public static final String SHOPPING_LIST_NAME_KEY = "ShoppingListName";
     public static final String SHOPPING_LIST_TYPE_KEY = "ShoppingListType";
     public static final String ITEM_OBJ_KEY = "ItemObjKey";
+    public static final String STORE_LIST_OBJ_KEY = "StoreListObj";
     public static final String STORE_NAME_KEY = "StoreNameKey";
 
     public static final String ITEM_TO_EDIT = "ItemToEdit";

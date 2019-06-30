@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import com.example.supjain.shoppinglist.adapters.ShoppingListsAdapter;
 import com.example.supjain.shoppinglist.data.ShoppingList;
-import com.example.supjain.shoppinglist.data.Store;
 import com.example.supjain.shoppinglist.util.ShoppingListUtil;
 import com.example.supjain.shoppinglist.viewmodel.ShoppingListsViewModel;
 import com.example.supjain.shoppinglist.widget.ShoppingListWidgetProvider;
@@ -43,8 +42,8 @@ import butterknife.OnClick;
 import static com.example.supjain.shoppinglist.util.Constants.RC_CREATE_LIST;
 import static com.example.supjain.shoppinglist.util.Constants.RC_SIGN_IN;
 import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_NAME_KEY;
+import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_OBJ_KEY;
 import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_TYPE_KEY;
-import static com.example.supjain.shoppinglist.util.Constants.STORE_LIST_OBJ_KEY;
 
 public class MainActivity extends AppCompatActivity implements
         ShoppingListsAdapter.ShoppingListsAdapterOnClickHandler {
@@ -276,8 +275,7 @@ public class MainActivity extends AppCompatActivity implements
             finish();
         } else {
             Intent intent = new Intent(this, DisplayShoppingListActivity.class);
-            intent.putParcelableArrayListExtra(STORE_LIST_OBJ_KEY, (ArrayList<Store>) list.getStores());
-            intent.putExtra(SHOPPING_LIST_NAME_KEY, list.getShoppingListName());
+            intent.putExtra(SHOPPING_LIST_OBJ_KEY, list);
             startActivity(intent);
         }
     }

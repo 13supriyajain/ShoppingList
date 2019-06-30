@@ -48,10 +48,6 @@ public class Store implements Parcelable {
         return storeName;
     }
 
-    public void setStoreName(String storeName) {
-        this.storeName = storeName;
-    }
-
     public List<Item> getItems() {
         return items;
     }

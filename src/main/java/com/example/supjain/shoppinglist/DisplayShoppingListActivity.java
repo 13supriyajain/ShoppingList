@@ -1,5 +1,7 @@
 package com.example.supjain.shoppinglist;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -9,8 +11,10 @@ import android.widget.Toast;
 
 import com.example.supjain.shoppinglist.adapters.ItemListAdapter;
 import com.example.supjain.shoppinglist.data.Item;
+import com.example.supjain.shoppinglist.data.ShoppingList;
 import com.example.supjain.shoppinglist.data.Store;
 import com.example.supjain.shoppinglist.viewmodel.ItemListViewModel;
+import com.example.supjain.shoppinglist.widget.ShoppingListWidgetProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -35,7 +39,7 @@ import static com.example.supjain.shoppinglist.util.Constants.EDIT_ITEM_OP;
 import static com.example.supjain.shoppinglist.util.Constants.ITEM_OBJ_KEY;
 import static com.example.supjain.shoppinglist.util.Constants.ITEM_TO_EDIT;
 import static com.example.supjain.shoppinglist.util.Constants.RC_CREATE_ITEM;
-import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_NAME_KEY;
+import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_OBJ_KEY;
 import static com.example.supjain.shoppinglist.util.Constants.STORE_LIST_OBJ_KEY;
 import static com.example.supjain.shoppinglist.util.Constants.STORE_NAME_KEY;
 import static com.example.supjain.shoppinglist.util.Constants.UNCHECK_ITEM_OP;
@@ -49,6 +53,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
     RecyclerView recyclerView;
 
     private ItemListViewModel itemListViewModel;
+    private ShoppingList shoppingList;
     private ArrayList<Store> storeList;
     private ItemListAdapter itemListAdapter;
     private FirebaseFirestore firebaseDb;
@@ -59,8 +64,10 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null)
+        if (savedInstanceState != null) {
             storeList = savedInstanceState.getParcelableArrayList(STORE_LIST_OBJ_KEY);
+            shoppingList = savedInstanceState.getParcelable(SHOPPING_LIST_OBJ_KEY);
+        }
 
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         firebaseDb = FirebaseFirestore.getInstance();
@@ -69,9 +76,18 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
         ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_display_shopping_list);
         binding.setLifecycleOwner(this);
 
-        Intent intent = getIntent();
-        shoppingListName = intent.getStringExtra(SHOPPING_LIST_NAME_KEY);
-        setTitle(shoppingListName);
+        if (shoppingList == null) {
+            Intent intent = getIntent();
+            shoppingList = intent.getParcelableExtra(SHOPPING_LIST_OBJ_KEY);
+        }
+
+        if (shoppingList != null) {
+            shoppingListName = shoppingList.getShoppingListName();
+            setTitle(shoppingListName);
+
+            if (storeList == null)
+                storeList = shoppingList.getStores();
+        }
 
         itemListViewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
         binding.setVariable(BR.viewModel, itemListViewModel);
@@ -91,9 +107,6 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
                 itemListAdapter.setStoresList(null);
             }
         });
-
-        if (storeList == null && intent.hasExtra(STORE_LIST_OBJ_KEY))
-            storeList = intent.getParcelableArrayListExtra(STORE_LIST_OBJ_KEY);
 
         if (storeList == null || storeList.isEmpty())
             itemListViewModel.setErrorMsg(getResources().getString(R.string.no_item_err_msg));
@@ -257,11 +270,24 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(STORE_LIST_OBJ_KEY, storeList);
+        outState.putParcelable(SHOPPING_LIST_OBJ_KEY, shoppingList);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        // Update all the changes in the store list obj in the DB, in shopping list obj and in widget(s)
         saveStoreListChangesInDb();
+        if (shoppingList != null) {
+            shoppingList.setStores(storeList);
+            updateWidgets(shoppingList);
+        }
+    }
+
+    private void updateWidgets(ShoppingList list) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,
+                ShoppingListWidgetProvider.class));
+        ShoppingListWidgetProvider.updateAppWidgets(this, appWidgetManager, list, appWidgetIds);
     }
 }

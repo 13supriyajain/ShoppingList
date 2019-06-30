@@ -13,13 +13,11 @@ import com.example.supjain.shoppinglist.data.Item;
 import com.example.supjain.shoppinglist.data.ShoppingList;
 import com.example.supjain.shoppinglist.data.Store;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.core.app.TaskStackBuilder;
 
-import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_NAME_KEY;
-import static com.example.supjain.shoppinglist.util.Constants.STORE_LIST_OBJ_KEY;
+import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_OBJ_KEY;
 
 public class ShoppingListWidgetProvider extends AppWidgetProvider {
 
@@ -27,8 +25,7 @@ public class ShoppingListWidgetProvider extends AppWidgetProvider {
                                 ShoppingList list, int appWidgetId) {
         // Create an Intent to launch DisplayShoppingListActivity when clicked
         Intent intent = new Intent(context, DisplayShoppingListActivity.class);
-        intent.putParcelableArrayListExtra(STORE_LIST_OBJ_KEY, (ArrayList<Store>) list.getStores());
-        intent.putExtra(SHOPPING_LIST_NAME_KEY, list.getShoppingListName());
+        intent.putExtra(SHOPPING_LIST_OBJ_KEY, list);
 
         // Use TaskStackBuilder to build the back stack and get the PendingIntent
         PendingIntent pendingIntent =
