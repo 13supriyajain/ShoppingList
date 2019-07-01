@@ -19,6 +19,7 @@ import androidx.core.app.TaskStackBuilder;
 
 import static com.example.supjain.shoppinglist.util.Constants.SHOPPING_LIST_OBJ_KEY;
 
+// This class takes care of setting/updating data in the app widget(s)
 public class ShoppingListWidgetProvider extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,

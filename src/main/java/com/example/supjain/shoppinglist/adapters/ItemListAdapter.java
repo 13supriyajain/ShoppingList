@@ -99,11 +99,16 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ItemLi
         return indexMap;
     }
 
+    // Set the store list in the adapter
     public void setStoresList(List<Store> stores) {
         this.storesList = stores;
         notifyDataSetChanged();
     }
 
+    /**
+     * Any class which wants to handle buttons or checkbox clicks, from the shopping list,
+     * should implement this interface.
+     **/
     public interface ItemListAdapterOnClickHandler {
         void mClick(String operation, Item item);
     }

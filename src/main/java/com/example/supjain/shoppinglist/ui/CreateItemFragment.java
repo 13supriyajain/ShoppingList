@@ -87,6 +87,10 @@ public class CreateItemFragment extends Fragment {
             Objects.requireNonNull(getActivity()).finish();
     }
 
+    /**
+     * Retrieves input values from edit texts, checks for validity and then saves these changes.
+     * In case on invalid input values, displays error/alert dialog.
+     */
     private void retrieveAndSaveValues() {
         String itemName = "";
         if (itemNameEditText != null) {
@@ -139,18 +143,22 @@ public class CreateItemFragment extends Fragment {
         }
     }
 
+    // Checks if Item-name input value is invalid
     private boolean isInvalidItemNameValue(String itemName) {
         return TextUtils.isEmpty(itemName) || itemName.length() > ITEM_NAME_MAX_LENGTH;
     }
 
+    // Checks if Store-name input value is invalid
     private boolean isInvalidStoreNameValue(String storeName) {
         return TextUtils.isEmpty(storeName) || storeName.length() > STORE_NAME_MAX_LENGTH;
     }
 
+    // Checks if Item-measurement input value is invalid
     private boolean isInvalidMeasurementValue(String measurementValue) {
         return TextUtils.isEmpty(measurementValue) || measurementValue.length() > MEASUREMENT_VALUE_MAX_LENGTH;
     }
 
+    // Show error/alert dialog in case of an error / invalid input value
     private void showErrorAlertDialog(int errMsgId) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
         alertDialog.setTitle(R.string.failure_err_title);
@@ -160,7 +168,7 @@ public class CreateItemFragment extends Fragment {
     }
 
     @OnTextChanged({R.id.item_name_edittext, R.id.item_quantity_edittext, R.id.item_measure_edittext,
-            R.id.store_name_edittext})
+            R.id.store_name_edittext })
     void onEditTextChanged() {
         dataChanged = true;
     }
@@ -171,6 +179,7 @@ public class CreateItemFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
+    // Any class which wants to handle save item button click, should implement this interface.
     public interface SaveItemReqHandler {
         void onSaveItemBtnClick(Item item, String storeName);
     }

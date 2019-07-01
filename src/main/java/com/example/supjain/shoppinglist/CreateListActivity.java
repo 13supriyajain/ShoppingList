@@ -63,6 +63,7 @@ public class CreateListActivity extends AppCompatActivity implements CreateListF
         return super.onOptionsItemSelected(item);
     }
 
+    // Show discard changes confirmation/alert dialog
     private void showDiscardChangesAlertDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(getString(R.string.discard_changes_alert_dialog_title));
@@ -70,7 +71,7 @@ public class CreateListActivity extends AppCompatActivity implements CreateListF
         alertDialogBuilder.setPositiveButton(getString(R.string.discard_changes_alert_dialog_confirm_text), (dialog, which) -> {
             dialog.dismiss();
             finish();
-                });
+        });
         alertDialogBuilder.setNegativeButton(getString(R.string.alert_dialog_cancel_text), null);
         alertDialogBuilder.show();
     }

@@ -27,6 +27,7 @@ public class ShoppingListUtil {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
+    // Return drawable/image id based on list type
     public static int getShoppingListTypeIcon(String listType) {
         int listTypeIcon = R.drawable.ic_default_list;
 

@@ -64,17 +64,14 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            storeList = savedInstanceState.getParcelableArrayList(STORE_LIST_OBJ_KEY);
-            shoppingList = savedInstanceState.getParcelable(SHOPPING_LIST_OBJ_KEY);
-        }
-
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         firebaseDb = FirebaseFirestore.getInstance();
         currentUser = firebaseAuth.getCurrentUser();
 
-        ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_display_shopping_list);
-        binding.setLifecycleOwner(this);
+        if (savedInstanceState != null) {
+            storeList = savedInstanceState.getParcelableArrayList(STORE_LIST_OBJ_KEY);
+            shoppingList = savedInstanceState.getParcelable(SHOPPING_LIST_OBJ_KEY);
+        }
 
         if (shoppingList == null) {
             Intent intent = getIntent();
@@ -89,6 +86,8 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
                 storeList = shoppingList.getStores();
         }
 
+        ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_display_shopping_list);
+        binding.setLifecycleOwner(this);
         itemListViewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
         binding.setVariable(BR.viewModel, itemListViewModel);
         itemListViewModel.getList().observe(this, list -> {
@@ -167,9 +166,14 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
             String storeName = data.getStringExtra(STORE_NAME_KEY);
 
             if (storeName == null) {
+                // Item already exists in the shopping-list, user has just edited it
                 updateItemInStoreList(item, EDIT_ITEM_OP);
             } else if (!TextUtils.isEmpty(storeName)) {
+                // If store-list in the shopping-list obj is not null or empty
                 if (storeList != null && !storeList.isEmpty()) {
+                    // Then check if Store-name already exists in the shopping list,
+                    // if yes then add new item to the store list
+                    // else create and add new store object to store-list
                     int storeObjIndex = getIndexIfStoreObjWithNameAlreadyExists(storeName, storeList);
                     if (storeObjIndex != -1) {
                         Store storeObj = storeList.get(storeObjIndex);
@@ -178,14 +182,18 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
                     } else
                         createNewStore(storeName, item);
                 } else {
+                    // If store-list is empty in the shopping-list obj, create new store-list
+                    // and then add new store and the item to it.
                     storeList = new ArrayList<>();
                     createNewStore(storeName, item);
                 }
             }
+            // Update UI with new changes
             itemListViewModel.setList(storeList);
         }
     }
 
+    // Edit or delete item from store-list
     private void updateItemInStoreList(Item item, String operation) {
         if (item != null) {
             String storeId = item.getItemStoreId();
@@ -201,7 +209,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
                         else {
                             // Delete item
                             itemList.remove(itemObjIndex);
-                            // If itemList gets empty, remove store from the storelist
+                            // If itemList gets empty, remove store from the store-list
                             if (itemList.isEmpty())
                                 storeList.remove(storeObjIndex);
                         }
@@ -211,6 +219,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
         }
     }
 
+    // Create new store object and put it in store-list
     private void createNewStore(String storeName, Item item) {
         Store storeObj = new Store(storeName, null);
         item.setItemStoreId(storeObj.getStoreId());
@@ -220,6 +229,8 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
         storeList.add(storeObj);
     }
 
+    // Check if item already exists in the item-list of a store in the shopping-list
+    // If yes, return its index else -1
     private int getIndexIfItemObjAlreadyExists(String itemId, List<Item> itemList) {
         for (int i = 0; i < itemList.size(); i++) {
             Item item = itemList.get(i);
@@ -230,6 +241,8 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
         return -1;
     }
 
+    // Check if store/store-name already exists in the store-list
+    // If yes, return its index else -1
     private int getIndexIfStoreObjWithNameAlreadyExists(String storeName, List<Store> storeList) {
         for (int i = 0; i < storeList.size(); i++) {
             Store store = storeList.get(i);
@@ -240,6 +253,8 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
         return -1;
     }
 
+    // Check if store/store-id already exists in the store-list
+    // If yes, return its index else -1
     private int getIndexIfStoreObjWithIdAlreadyExists(String storeId, List<Store> storeList) {
         for (int i = 0; i < storeList.size(); i++) {
             Store store = storeList.get(i);
@@ -250,6 +265,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
         return -1;
     }
 
+    // Save shopping-list changes in the DB
     private void saveStoreListChangesInDb() {
         if (currentUser != null) {
             final String userId = currentUser.getUid();
@@ -257,10 +273,12 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
                     .document(shoppingListName)
                     .update("stores", storeList)
                     .addOnFailureListener(e -> Toast.makeText(getApplicationContext(),
-                            R.string.Update_list_error_msg, Toast.LENGTH_SHORT).show());
+                            R.string.Update_list_error_msg, Toast.LENGTH_SHORT)
+                            .show());
         }
     }
 
+    // Delete an item from the store-list and update the UI
     private void deleteItem(Item item) {
         updateItemInStoreList(item, DELETE_ITEM_OP);
         itemListViewModel.setList(storeList);
@@ -284,6 +302,7 @@ public class DisplayShoppingListActivity extends AppCompatActivity implements
         }
     }
 
+    // Update widget(s), with updated shopping-list data
     private void updateWidgets(ShoppingList list) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,

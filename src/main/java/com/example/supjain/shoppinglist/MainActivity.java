@@ -68,6 +68,10 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setTitle(R.string.main_activity_title);
 
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDb = FirebaseFirestore.getInstance();
+        checkIfUserIsSignedIn();
+
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         if (extras != null) {
@@ -77,13 +81,8 @@ public class MainActivity extends AppCompatActivity implements
             widgetConfigCall = appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID;
         }
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseDb = FirebaseFirestore.getInstance();
-        checkIfUserIsSignedIn();
-
         ViewDataBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         binding.setLifecycleOwner(this);
-
         shoppingListsViewModel = ViewModelProviders.of(this).get(ShoppingListsViewModel.class);
         shoppingListsViewModel.getList().observe(this, list -> {
             if (list != null && !list.isEmpty() && shoppingListsAdapter != null) {
@@ -115,6 +114,10 @@ public class MainActivity extends AppCompatActivity implements
         recyclerView.setHasFixedSize(true);
     }
 
+    /**
+     * Check if there is network connection, if yes then fetch shopping lists for the currently
+     * signed-in user and update the UI.
+     */
     private void fetchAndSetShoppingLists() {
         if (!ShoppingListUtil.hasNetworkConnection(this))
             shoppingListsViewModel.setErrorMsg(getResources().getString(R.string.no_connection_err_msg));
@@ -140,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    // Check if user is already signed-in, if not show sign-in page
     private void checkIfUserIsSignedIn() {
         currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null) {
@@ -170,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    // If there is network connection and user is signed-in, check if shopping list already exists
     private void validateAndSaveShoppingList(ShoppingList newShoppingList) {
         if (!ShoppingListUtil.hasNetworkConnection(this)) {
             showErrorAlertDialog(R.string.failure_err_title, R.string.no_connection_err_msg);
@@ -179,6 +184,11 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Check if shopping-list (name) already exists.
+     * If yes, then show error to the user,
+     * else store new shopping-list in the DB.
+     */
     private void checkIfListAlreadyExists(final String userId, final ShoppingList newShoppingList) {
         firebaseDb.collection(userId)
                 .document(newShoppingList.getShoppingListName())
@@ -198,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements
                         R.string.failure_err_msg));
     }
 
+    // Store new shopping-list in the DB
     private void storeShoppingList(String userId, ShoppingList newShoppingList) {
         firebaseDb.collection(userId)
                 .document(newShoppingList.getShoppingListName())
@@ -211,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements
                         R.string.failure_err_msg));
     }
 
+    // Show alert dialog with appropriate error message
     private void showErrorAlertDialog(int errTitleId, int errMsgId) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle(errTitleId);
@@ -219,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements
         alertDialog.show();
     }
 
+    // Sign-out user, and on success ask them to sign-in again, if needed
     private void signOut() {
         AuthUI.getInstance()
                 .signOut(this)
@@ -229,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements
                 });
     }
 
+    // Shows sign-in page to user
     private void signIn() {
         startActivityForResult(
                 AuthUI.getInstance()
@@ -274,6 +288,7 @@ public class MainActivity extends AppCompatActivity implements
             setResult(RESULT_OK, resultValue);
             finish();
         } else {
+            // Display shopping list, selected by user
             Intent intent = new Intent(this, DisplayShoppingListActivity.class);
             intent.putExtra(SHOPPING_LIST_OBJ_KEY, list);
             startActivity(intent);
@@ -286,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements
         fetchAndSetShoppingLists();
     }
 
+    // Update widget(s), to display shopping list selected
     private void updateWidgets(ShoppingList list) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,

@@ -23,6 +23,7 @@ public class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdap
         this.clickHandler = clickHandler;
     }
 
+    // Sets shopping lists in the recycler view adapter
     public void setShoppingLists(List<ShoppingList> list) {
         this.shoppingLists = list;
         notifyDataSetChanged();
@@ -51,6 +52,10 @@ public class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdap
         return shoppingLists.size();
     }
 
+    /**
+     * Any class which wants to handle shopping-lists recycler view click event, should implement
+     * this interface.
+     **/
     public interface ShoppingListsAdapterOnClickHandler {
         void mRecyclerViewClick(ShoppingList list);
     }

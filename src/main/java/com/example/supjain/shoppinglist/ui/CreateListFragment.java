@@ -79,10 +79,12 @@ public class CreateListFragment extends Fragment {
             showErrorAlertDialog();
     }
 
+    // Checks if Shopping list name is invalid
     private boolean isInvalidListName(String listName) {
         return TextUtils.isEmpty(listName) || listName.length() > LIST_NAME_MAX_LENGTH;
     }
 
+    // Show error/alert dialog if shopping list name is invalid
     private void showErrorAlertDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
         alertDialog.setTitle(R.string.failure_err_title);
@@ -102,6 +104,7 @@ public class CreateListFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
+    // Any class which wants to handle create list button click, should implement this interface.
     public interface CreateListReqHandler {
         void onCreateListBtnClick(String listName, String listType);
     }
